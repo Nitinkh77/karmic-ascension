@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+/* ───────────────────────────────────────────────────────────────
+   Karmic Ascension design tokens
+   Bright royal-Indian palette: ivory & white grounds, deep maroon for
+   emphasis, antique gold + saffron accents, charcoal body text.
+   Text colours are chosen for WCAG AA on ivory:
+     maroon #6b1d2a on ivory ≈ 12:1 · charcoal #2b2622 ≈ 14:1 · ink-soft #5a514a ≈ 7:1
+   Gold is used for ornament/borders, never for small text on ivory.
+   ─────────────────────────────────────────────────────────────── */
+@theme {
+  --color-white-warm: #fffdf8;
+  --color-ivory: #fbf7ee;
+  --color-parchment: #f4ecd9;
+  --color-sand: #e9dec5;
+
+  --color-gold: #b08d3c;
+  --color-gold-deep: #7f611b; /* AA on ivory for text/links */
+  --color-gold-soft: #e6d3a0;
+
+  --color-saffron: #e07a1f;
+  --color-saffron-deep: #a8520a; /* AA on ivory for text */
+  --color-saffron-soft: #fbe6cf;
+
+  --color-maroon: #6b1d2a;
+  --color-maroon-deep: #4e1320;
+  --color-maroon-soft: #f6e7e9;
+
+  --color-charcoal: #2b2622;
+  --color-ink-soft: #5a514a;
+
+  --color-success: #2f6b3f;
+  --color-danger: #a12626;
+
+  --shadow-card: 0 1px 2px rgb(107 29 42 / 0.05), 0 10px 28px -14px rgb(107 29 42 / 0.2);
+  --shadow-lift: 0 2px 4px rgb(107 29 42 / 0.06), 0 18px 36px -16px rgb(107 29 42 / 0.28);
+}
+
+/* next/font injects --font-* variables on <html>; `inline` lets utilities reference them. */
+@theme inline {
+  --font-serif: var(--font-cormorant), ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-devanagari: var(--font-deva), "Noto Serif Devanagari", serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background-color: var(--color-ivory);
+    color: var(--color-charcoal);
+    font-family: var(--font-sans);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background: var(--color-gold-soft);
+    color: var(--color-maroon-deep);
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-saffron);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  /* Respect users who prefer less motion */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Double-rule gold frame: a quiet nod to Indian manuscript borders */
+  .ornate-frame {
+    position: relative;
+    border: 1px solid var(--color-gold-soft);
+    background: var(--color-white-warm);
+    box-shadow: var(--shadow-card);
+  }
+  .ornate-frame::before {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border: 1px solid color-mix(in srgb, var(--color-gold) 38%, transparent);
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-saffron-deep);
+  }
+
+  .prose-ka p + p {
+    margin-top: 1rem;
+  }
+  .prose-ka h2 {
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    color: var(--color-maroon);
+  }
+  .prose-ka ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+
+  .deva {
+    font-family: var(--font-devanagari);
+    line-height: 1.9;
+  }
+
+  .field {
+    width: 100%;
+    border: 1px solid var(--color-sand);
+    background: var(--color-white-warm);
+    border-radius: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    min-height: 2.75rem;
+    color: var(--color-charcoal);
+    transition: border-color 120ms, box-shadow 120ms;
+  }
+  .field:hover {
+    border-color: var(--color-gold);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-maroon);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-saffron) 35%, transparent);
+  }
+  .field[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+}
+
+@keyframes slow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spin-slow {
+  animation: slow-spin 180s linear infinite;
+  transform-origin: center;
+}

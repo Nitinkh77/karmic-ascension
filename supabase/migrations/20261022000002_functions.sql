@@ -54,6 +54,26 @@ revoke all on function public.page_exists(text) from public;
 grant execute on function public.page_exists(text) to anon, authenticated, service_role;
 
 -- ----------------------------------------------------------------------------
+-- hidden_section_keys: keys (NOT content) of sections the owner has hidden, so
+-- built-in defaults for those keys are not shown again. Safe for anon.
+-- ----------------------------------------------------------------------------
+create or replace function public.hidden_section_keys(p_slug text)
+returns text[]
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select coalesce(array_agg(s.section_key), '{}'::text[])
+  from public.page_sections s
+  join public.pages p on p.id = s.page_id
+  where p.slug = p_slug and not s.is_visible;
+$$;
+
+revoke all on function public.hidden_section_keys(text) from public;
+grant execute on function public.hidden_section_keys(text) to anon, authenticated, service_role;
+
+-- ----------------------------------------------------------------------------
 -- create_booking: the ONLY way a public visitor creates a booking.
 -- Called from a Next.js Server Action using the service-role key, after the
 -- server has validated the payload with Zod and checked rate limits.
