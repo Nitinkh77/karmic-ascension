@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   const nowIso = new Date().toISOString();
 
   const count = (q: PromiseLike<{ count: number | null }>) => q.then((r) => r.count ?? 0);
-  const [total, pending, confirmed, awaitingPayment, upcoming, recent, services] = await Promise.all([
+  const [total, pending, confirmed, awaitingPayment, upcoming, recent, services, newLeads] = await Promise.all([
     count(supabase.from("bookings").select("id", { count: "exact", head: true })),
     count(supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "pending")),
     count(supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "confirmed")),
@@ -37,22 +37,24 @@ export default async function DashboardPage() {
       .order("created_at", { ascending: false })
       .limit(8),
     count(supabase.from("services").select("id", { count: "exact", head: true }).eq("status", "published")),
+    count(supabase.from("leads").select("id", { count: "exact", head: true }).eq("status", "new")),
   ]);
 
-  const stats = [
+  const stats: Array<{ label: string; value: number; href?: string }> = [
     { label: "All bookings", value: total },
     { label: "Pending", value: pending },
     { label: "Confirmed", value: confirmed },
     { label: "Awaiting payment", value: awaitingPayment },
+    { label: "New leads", value: newLeads, href: "/admin/leads?status=new" },
   ];
 
   return (
     <>
       <PageTitle title="Dashboard" description="Live figures from your bookings database." />
-      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         {stats.map((s) => (
           <Card key={s.label}>
-            <dt className="eyebrow">{s.label}</dt>
+            <dt className="eyebrow">{s.href ? <Link href={s.href} className="hover:underline">{s.label}</Link> : s.label}</dt>
             <dd className="mt-2 font-serif text-4xl text-maroon">{s.value}</dd>
           </Card>
         ))}

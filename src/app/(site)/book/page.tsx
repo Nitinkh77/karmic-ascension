@@ -50,7 +50,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
 
   return (
     <section className="py-12 sm:py-16">
-      <Container narrow>
+      <Container>
         <SectionHeading
           as="h1"
           eyebrow="Booking"
@@ -69,6 +69,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
             dates={dates}
             hoursText={settings.hours_text}
             policyText={settings.booking_policy_text}
+            whatsappHref={wa}
           />
         )}
       </Container>

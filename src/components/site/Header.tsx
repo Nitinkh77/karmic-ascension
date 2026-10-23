@@ -5,7 +5,7 @@ import { ButtonLink, Container } from "@/components/ui";
 
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/services", label: "Consultations" },
+  { href: "/services", label: "Services" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];

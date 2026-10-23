@@ -158,8 +158,27 @@ export interface Booking {
   created_at: string;
 }
 
+export type LeadStatus = "new" | "contacted" | "qualified" | "converted" | "lost";
+
+export interface Lead {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  message: string | null;
+  service_id: string | null;
+  source: string;
+  status: LeadStatus;
+  consent: boolean;
+  admin_notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export type ActionState = {
   ok: boolean;
   message?: string;
   errors?: Record<string, string>;
+  /** Submitted text values, returned on failure so forms can repopulate after React resets them. */
+  values?: Record<string, string>;
 } | null;

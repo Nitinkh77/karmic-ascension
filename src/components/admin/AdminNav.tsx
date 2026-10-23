@@ -13,6 +13,7 @@ import {
   Menu,
   MessageSquareQuote,
   Settings,
+  Users,
   Sparkles,
   X,
   type LucideIcon,
@@ -22,6 +23,7 @@ import { cn } from "@/lib/utils";
 const ITEMS: Array<{ href: string; label: string; Icon: LucideIcon }> = [
   { href: "/admin", label: "Dashboard", Icon: LayoutDashboard },
   { href: "/admin/bookings", label: "Bookings", Icon: CalendarDays },
+  { href: "/admin/leads", label: "Leads", Icon: Users },
   { href: "/admin/services", label: "Services & pricing", Icon: Sparkles },
   { href: "/admin/availability", label: "Availability", Icon: CalendarClock },
   { href: "/admin/content", label: "Website content", Icon: FileText },

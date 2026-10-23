@@ -35,6 +35,10 @@ export async function submitBooking(_prev: ActionState, formData: FormData): Pro
     [...formData.entries()].filter(([, v]) => typeof v === "string"),
   ) as Record<string, string | boolean>;
   raw.accept_terms = formData.get("accept_terms") === "on";
+  // Echoed back on failure so the browser can refill the form (never includes the honeypot).
+  const values: Record<string, string> = {};
+  for (const [k, v] of Object.entries(raw)) if (typeof v === "string" && k !== "website") values[k] = v;
+  if (raw.accept_terms === true) values.accept_terms = "on";
 
   // Honeypot filled → pretend success without doing anything.
   if (typeof raw.website === "string" && raw.website.length > 0) {
@@ -43,7 +47,7 @@ export async function submitBooking(_prev: ActionState, formData: FormData): Pro
 
   const ip = await clientIp();
   if (!rateLimit(`book:${ip}`, 5, 10 * 60_000)) {
-    return { ok: false, message: "Too many attempts. Please wait a few minutes and try again." };
+    return { ok: false, message: "Too many attempts. Please wait a few minutes and try again.", values };
   }
 
   const parsed = bookingSchema.safeParse(raw);
@@ -53,7 +57,7 @@ export async function submitBooking(_prev: ActionState, formData: FormData): Pro
       const k = String(i.path[0] ?? "_form");
       if (!errors[k]) errors[k] = i.message;
     }
-    return { ok: false, message: "Please check the highlighted fields.", errors };
+    return { ok: false, message: "Please check the highlighted fields.", errors, values };
   }
   const d = parsed.data;
 
@@ -66,13 +70,13 @@ export async function submitBooking(_prev: ActionState, formData: FormData): Pro
     .eq("id", d.service_id)
     .eq("status", "published")
     .maybeSingle();
-  if (!svc) return { ok: false, message: FRIENDLY.service_unavailable };
+  if (!svc) return { ok: false, message: FRIENDLY.service_unavailable, values };
   if (svc.requires_birth_details) {
     const errors: Record<string, string> = {};
     if (!d.birth_date) errors.birth_date = "Date of birth is needed to prepare your chart.";
     if (!d.birth_time) errors.birth_time = "Time of birth is needed (approximate is fine; say so in notes).";
     if (!d.birth_place) errors.birth_place = "Place of birth is needed to prepare your chart.";
-    if (Object.keys(errors).length) return { ok: false, message: "Please add your birth details.", errors };
+    if (Object.keys(errors).length) return { ok: false, message: "Please add your birth details.", errors, values };
   }
 
   const { data, error } = await sb.rpc("create_booking", {
@@ -89,15 +93,15 @@ export async function submitBooking(_prev: ActionState, formData: FormData): Pro
 
   if (error) {
     const key = Object.keys(FRIENDLY).find((k) => error.message?.includes(k));
-    if (key) return { ok: false, message: FRIENDLY[key], errors: key === "slot_taken" ? { starts_at: "Please pick another time." } : undefined };
+    if (key) return { ok: false, message: FRIENDLY[key], errors: key === "slot_taken" ? { starts_at: "Please pick another time." } : undefined, values };
     console.error("[create_booking]", error.code, error.message);
-    return { ok: false, message: "We could not save your booking. Nothing was charged. Please try again or contact us." };
+    return { ok: false, message: "We could not save your booking. Nothing was charged. Please try again or contact us.", values };
   }
 
   const row = Array.isArray(data) ? data[0] : data;
   if (!row?.booking_code || !row?.booking_token) {
     console.error("[create_booking] unexpected response", data);
-    return { ok: false, message: "We could not confirm your booking. Please contact us." };
+    return { ok: false, message: "We could not confirm your booking. Please check with us before booking again.", values };
   }
 
   redirect(`/book/confirmation?code=${encodeURIComponent(row.booking_code)}&token=${encodeURIComponent(row.booking_token)}`);

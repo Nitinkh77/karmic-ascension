@@ -1,0 +1,3218 @@
+﻿
+===== src\app\layout.tsx =====
+import type { Metadata, Viewport } from "next";
+import { Cormorant_Garamond, Inter, Noto_Serif_Devanagari } from "next/font/google";
+import { siteUrl } from "@/lib/env";
+import "./globals.css";
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-cormorant",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const deva = Noto_Serif_Devanagari({
+  subsets: ["devanagari"],
+  weight: ["400", "600"],
+  variable: "--font-deva",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Karmic Ascension â€“ Vedic Astrologyâ„¢",
+    template: "%s | Karmic Ascension â€“ Vedic Astrologyâ„¢",
+  },
+  description:
+    "Book Vedic astrology consultation to know your pending karma for material and spiritual transformation.",
+  applicationName: "Karmic Ascension",
+  openGraph: {
+    type: "website",
+    siteName: "Karmic Ascension â€“ Vedic Astrologyâ„¢",
+    locale: "en_IN",
+  },
+  twitter: { card: "summary_large_image" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#fbf7ee",
+  width: "device-width",
+  initialScale: 1,
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className={`${cormorant.variable} ${inter.variable} ${deva.variable}`}>
+      <body className="min-h-screen">{children}</body>
+    </html>
+  );
+}
+
+===== src\components\admin\AdminNav.tsx =====
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import {
+  CalendarClock,
+  CalendarDays,
+  FileText,
+  HelpCircle,
+  Image as ImageIcon,
+  LayoutDashboard,
+  Menu,
+  MessageSquareQuote,
+  Settings,
+  Sparkles,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const ITEMS: Array<{ href: string; label: string; Icon: LucideIcon }> = [
+  { href: "/admin", label: "Dashboard", Icon: LayoutDashboard },
+  { href: "/admin/bookings", label: "Bookings", Icon: CalendarDays },
+  { href: "/admin/services", label: "Services & pricing", Icon: Sparkles },
+  { href: "/admin/availability", label: "Availability", Icon: CalendarClock },
+  { href: "/admin/content", label: "Website content", Icon: FileText },
+  { href: "/admin/media", label: "Media library", Icon: ImageIcon },
+  { href: "/admin/faqs", label: "FAQs", Icon: HelpCircle },
+  { href: "/admin/testimonials", label: "Testimonials", Icon: MessageSquareQuote },
+  { href: "/admin/settings", label: "Settings", Icon: Settings },
+];
+
+function NavList({ onNavigate }: { onNavigate?: () => void }) {
+  const pathname = usePathname();
+  return (
+    <ul className="space-y-1">
+      {ITEMS.map(({ href, label, Icon }) => {
+        const active = href === "/admin" ? pathname === href : pathname.startsWith(href);
+        return (
+          <li key={href}>
+            <Link
+              href={href}
+              onClick={onNavigate}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors",
+                active ? "bg-maroon text-ivory" : "text-charcoal hover:bg-parchment",
+              )}
+            >
+              <Icon className="h-4 w-4" aria-hidden="true" />
+              {label}
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+export function AdminSidebar() {
+  return (
+    <nav aria-label="Admin" className="hidden w-60 shrink-0 border-r border-sand bg-white-warm p-4 lg:block">
+      <NavList />
+    </nav>
+  );
+}
+
+export function AdminMobileNav() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="lg:hidden">
+      <button
+        type="button"
+        className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-sand bg-white-warm"
+        aria-expanded={open}
+        aria-controls="admin-mobile-nav"
+        aria-label={open ? "Close admin menu" : "Open admin menu"}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
+      {open && (
+        <nav
+          id="admin-mobile-nav"
+          aria-label="Admin"
+          className="absolute inset-x-0 top-full z-30 border-b border-sand bg-white-warm p-4 shadow-lift"
+        >
+          <NavList onNavigate={() => setOpen(false)} />
+        </nav>
+      )}
+    </div>
+  );
+}
+
+===== src\components\admin\LoginForm.tsx =====
+"use client";
+
+import { useActionState } from "react";
+import { Loader2 } from "lucide-react";
+import { login } from "@/app/admin/login/actions";
+import { Button } from "@/components/ui";
+
+export function LoginForm() {
+  const [state, action, pending] = useActionState(login, null);
+  return (
+    <form action={action} className="mt-6 space-y-5" noValidate>
+      {state?.message && (
+        <p role="alert" className="rounded-xl border border-danger/40 bg-red-50 p-3 text-sm text-danger">
+          {state.message}
+        </p>
+      )}
+      <div>
+        <label htmlFor="email" className="mb-1.5 block text-sm font-semibold">
+          Email
+        </label>
+        <input id="email" name="email" type="email" autoComplete="username" required className="field" aria-invalid={!!state?.errors?.email} />
+        {state?.errors?.email && <p className="mt-1 text-sm text-danger">{state.errors.email}</p>}
+      </div>
+      <div>
+        <label htmlFor="password" className="mb-1.5 block text-sm font-semibold">
+          Password
+        </label>
+        <input id="password" name="password" type="password" autoComplete="current-password" required className="field" aria-invalid={!!state?.errors?.password} />
+        {state?.errors?.password && <p className="mt-1 text-sm text-danger">{state.errors.password}</p>}
+      </div>
+      <Button type="submit" size="lg" className="w-full" disabled={pending}>
+        {pending ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Signing inâ€¦
+          </>
+        ) : (
+          "Sign in"
+        )}
+      </Button>
+    </form>
+  );
+}
+
+===== src\components\admin\MediaSelect.tsx =====
+"use client";
+
+import Image from "next/image";
+import { useState } from "react";
+import type { MediaAsset } from "@/lib/types";
+
+/** Select an uploaded image (with live preview). Empty = use the default ornament. */
+export function MediaSelect({
+  name,
+  assets,
+  defaultValue,
+  label = "Image",
+}: {
+  name: string;
+  assets: MediaAsset[];
+  defaultValue?: string | null;
+  label?: string;
+}) {
+  const [value, setValue] = useState(defaultValue ?? "");
+  const current = assets.find((a) => a.id === value);
+  return (
+    <div>
+      <label htmlFor={name} className="mb-1.5 block text-sm font-semibold text-charcoal">
+        {label}
+      </label>
+      <div className="flex items-start gap-4">
+        <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-sand bg-parchment">
+          {current?.url ? (
+            <Image src={current.url} alt={current.alt_text} fill sizes="112px" className="object-cover" unoptimized />
+          ) : (
+            <span className="flex h-full items-center justify-center px-2 text-center text-xs text-ink-soft">
+              Default ornament
+            </span>
+          )}
+        </div>
+        <div className="flex-1">
+          <select id={name} name={name} className="field" value={value} onChange={(e) => setValue(e.target.value)}>
+            <option value="">â€” None (default ornament) â€”</option>
+            {assets.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.folder} / {a.storage_path.split("/").pop()}
+              </option>
+            ))}
+          </select>
+          {assets.length === 0 && (
+            <p className="mt-1 text-xs text-ink-soft">No images yet â€” upload some in Media library first.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+===== src\components\admin\ServiceForm.tsx =====
+import { AdminForm, Check, Field } from "@/components/admin/ui";
+import { MediaSelect } from "@/components/admin/MediaSelect";
+import { saveService } from "@/app/admin/(panel)/actions";
+import type { MediaAsset, Service } from "@/lib/types";
+import { paiseToRupeesInput } from "@/lib/utils";
+
+export function ServiceForm({ service, assets }: { service?: Service | null; assets: MediaAsset[] }) {
+  const s = service;
+  return (
+    <AdminForm action={saveService} submitLabel={s ? "Save service" : "Create service"} className="space-y-6">
+      {s && <input type="hidden" name="id" value={s.id} />}
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field label="Title" name="title">
+          <input id="title" name="title" required defaultValue={s?.title} className="field" maxLength={160} />
+        </Field>
+        <Field label="URL slug" name="slug" hint="Leave empty to generate from the title. Changing it changes the public link.">
+          <input id="slug" name="slug" defaultValue={s?.slug} className="field" maxLength={80} />
+        </Field>
+        <Field label="Price (â‚¹)" name="price_rupees" hint="Whole rupees or with paise, e.g. 1500 or 1500.50. Leave empty to show â€œPrice on requestâ€.">
+          <input id="price_rupees" name="price_rupees" inputMode="decimal" defaultValue={paiseToRupeesInput(s?.price_paise)} className="field" />
+        </Field>
+        <Field label="Duration (minutes)" name="duration_minutes">
+          <input id="duration_minutes" name="duration_minutes" type="number" min={10} max={480} step={5} required defaultValue={s?.duration_minutes ?? 30} className="field" />
+        </Field>
+      </div>
+
+      <Field label="Short description (cards and search results)" name="short_description">
+        <textarea id="short_description" name="short_description" rows={2} defaultValue={s?.short_description} className="field" maxLength={300} />
+      </Field>
+      <Field label="Full description" name="description" hint="Blank line = new paragraph.">
+        <textarea id="description" name="description" rows={6} defaultValue={s?.description} className="field" maxLength={8000} />
+      </Field>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field label="What this includes (one per line)" name="features_text">
+          <textarea id="features_text" name="features_text" rows={5} defaultValue={s?.features.join("\n")} className="field" />
+        </Field>
+        <Field label="What the customer receives (one per line)" name="deliverables_text">
+          <textarea id="deliverables_text" name="deliverables_text" rows={5} defaultValue={s?.deliverables.join("\n")} className="field" />
+        </Field>
+      </div>
+
+      <MediaSelect name="image_asset_id" assets={assets} defaultValue={s?.image_asset_id} label="Service image" />
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field label="Status" name="status">
+          <select id="status" name="status" defaultValue={s?.status ?? "draft"} className="field">
+            <option value="draft">Draft (hidden)</option>
+            <option value="published">Published (visible and bookable)</option>
+            <option value="archived">Archived (hidden)</option>
+          </select>
+        </Field>
+        <Field label="Display order" name="sort_order" hint="Lower numbers appear first.">
+          <input id="sort_order" name="sort_order" type="number" min={0} defaultValue={s?.sort_order ?? 100} className="field" />
+        </Field>
+      </div>
+      <div className="space-y-3">
+        <Check name="is_featured" label="Featured on the home page" defaultChecked={s?.is_featured} />
+        <Check name="requires_birth_details" label="Ask for date, time and place of birth" hint="Shown to the customer with an explanation of why." defaultChecked={s?.requires_birth_details ?? true} />
+        <Check name="is_draft" label="Needs owner review" hint="Marks copy, price or duration that is still a placeholder. Does not hide the service." defaultChecked={s?.is_draft ?? false} />
+      </div>
+    </AdminForm>
+  );
+}
+
+===== src\components\admin\ui.tsx =====
+"use client";
+
+import { useActionState, useEffect, useRef, type ReactNode } from "react";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui";
+import type { ActionState } from "@/lib/types";
+
+type Action = (prev: ActionState, formData: FormData) => Promise<ActionState>;
+
+/** Wraps a form around a Server Action with pending, error and success feedback. */
+export function AdminForm({
+  action,
+  children,
+  submitLabel = "Save changes",
+  resetOnSuccess = false,
+  className,
+  hideSubmit = false,
+  danger = false,
+  confirmMessage,
+}: {
+  action: Action;
+  children: ReactNode;
+  submitLabel?: string;
+  resetOnSuccess?: boolean;
+  className?: string;
+  hideSubmit?: boolean;
+  danger?: boolean;
+  /** When set, the browser asks for confirmation before submitting (use for deletes). */
+  confirmMessage?: string;
+}) {
+  const [state, formAction, pending] = useActionState(action, null);
+  const ref = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (state?.ok && resetOnSuccess) ref.current?.reset();
+  }, [state, resetOnSuccess]);
+
+  return (
+    <form
+      ref={ref}
+      action={formAction}
+      className={className ?? "space-y-5"}
+      noValidate
+      onSubmit={(e) => {
+        if (confirmMessage && !window.confirm(confirmMessage)) e.preventDefault();
+      }}
+    >
+      {children}
+      <div aria-live="polite">
+        {state?.message && (
+          <p
+            role={state.ok ? "status" : "alert"}
+            className={
+              state.ok
+                ? "rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-success"
+                : "rounded-lg border border-danger/40 bg-red-50 px-3 py-2 text-sm font-medium text-danger"
+            }
+          >
+            {state.message}
+          </p>
+        )}
+        {state && !state.ok && state.errors && Object.keys(state.errors).length > 0 && (
+          <ul role="alert" className="mt-2 list-disc space-y-0.5 pl-5 text-sm text-danger">
+            {Object.entries(state.errors).map(([field, msg]) => (
+              <li key={field}>
+                <span className="font-semibold">{field.replace(/_/g, " ")}:</span> {msg}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      {!hideSubmit && (
+        <Button type="submit" disabled={pending} variant={danger ? "danger" : "primary"}>
+          {pending ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Savingâ€¦
+            </>
+          ) : (
+            submitLabel
+          )}
+        </Button>
+      )}
+    </form>
+  );
+}
+
+/** Server-error-aware field wrapper. `errors` comes from the action result via <FormErrors>. */
+export function Field({
+  label,
+  name,
+  hint,
+  children,
+}: {
+  label: string;
+  name: string;
+  hint?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div>
+      <label htmlFor={name} className="mb-1.5 block text-sm font-semibold text-charcoal">
+        {label}
+      </label>
+      {children}
+      {hint && <p className="mt-1 text-xs text-ink-soft">{hint}</p>}
+    </div>
+  );
+}
+
+export function Check({
+  name,
+  label,
+  defaultChecked,
+  hint,
+}: {
+  name: string;
+  label: string;
+  defaultChecked?: boolean;
+  hint?: string;
+}) {
+  return (
+    <label className="flex items-start gap-3 text-sm">
+      <input type="checkbox" name={name} defaultChecked={defaultChecked} className="mt-0.5 h-5 w-5 accent-maroon" />
+      <span>
+        <span className="font-semibold text-charcoal">{label}</span>
+        {hint && <span className="block text-xs text-ink-soft">{hint}</span>}
+      </span>
+    </label>
+  );
+}
+
+export function PageTitle({ title, description, children }: { title: string; description?: string; children?: ReactNode }) {
+  return (
+    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h1 className="text-3xl text-maroon sm:text-4xl">{title}</h1>
+        {description && <p className="mt-1.5 max-w-2xl text-ink-soft">{description}</p>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`rounded-2xl border border-sand bg-white-warm p-5 shadow-card sm:p-6 ${className}`}>{children}</div>;
+}
+
+export function Empty({ children }: { children: ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-gold bg-white-warm p-8 text-center text-ink-soft">{children}</div>
+  );
+}
+
+===== src\components\art\Mandala.tsx =====
+import { cn } from "@/lib/utils";
+
+/**
+ * Original geometric mandala (pure SVG, no external assets).
+ * Decorative only â†’ aria-hidden. Uses currentColor so callers set the tone.
+ */
+export function Mandala({
+  className,
+  rings = 3,
+  spin = false,
+}: {
+  className?: string;
+  rings?: 1 | 2 | 3;
+  spin?: boolean;
+}) {
+  const petals = Array.from({ length: 16 }, (_, i) => i * (360 / 16));
+  const inner = Array.from({ length: 8 }, (_, i) => i * 45 + 22.5);
+  const ticks = Array.from({ length: 72 }, (_, i) => i * 5);
+
+  return (
+    <svg
+      viewBox="-100 -100 200 200"
+      className={cn("text-gold", spin && "spin-slow", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="0.6"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle r="97" strokeWidth="0.8" />
+      <circle r="94" strokeOpacity="0.5" />
+      {ticks.map((a) => (
+        <line key={a} x1="0" y1="-94" x2="0" y2={a % 15 === 0 ? -89 : -91.5} transform={`rotate(${a})`} strokeOpacity="0.7" />
+      ))}
+
+      {rings >= 3 &&
+        petals.map((a) => (
+          <path key={`o${a}`} d="M0 -86 C 7 -76, 7 -66, 0 -58 C -7 -66, -7 -76, 0 -86 Z" transform={`rotate(${a})`} />
+        ))}
+      <circle r="56" strokeOpacity="0.6" />
+
+      {rings >= 2 &&
+        petals.map((a) => (
+          <path key={`m${a}`} d="M0 -54 C 9 -46, 9 -36, 0 -28 C -9 -36, -9 -46, 0 -54 Z" transform={`rotate(${a + 11.25})`} strokeOpacity="0.9" />
+        ))}
+      <circle r="27" />
+
+      {inner.map((a) => (
+        <path key={`i${a}`} d="M0 -26 C 5 -20, 5 -14, 0 -9 C -5 -14, -5 -20, 0 -26 Z" transform={`rotate(${a})`} />
+      ))}
+      {/* eight-point star */}
+      <path d="M0 -17 L5 -5 L17 0 L5 5 L0 17 L-5 5 L-17 0 L-5 -5 Z" strokeWidth="0.8" />
+      <circle r="4.5" strokeWidth="0.9" />
+      <circle r="1.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+===== src\components\art\Ornaments.tsx =====
+import { cn } from "@/lib/utils";
+
+/** Thin gold rule with a small lotus-diamond in the middle. */
+export function OrnamentDivider({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex items-center justify-center gap-3 text-gold", className)} aria-hidden="true">
+      <span className="h-px w-16 bg-gradient-to-r from-transparent to-gold sm:w-28" />
+      <svg viewBox="0 0 40 16" className="h-4 w-10" fill="none" stroke="currentColor" strokeWidth="1">
+        <path d="M20 1 L25 8 L20 15 L15 8 Z" />
+        <path d="M20 4 L22.5 8 L20 12 L17.5 8 Z" fill="currentColor" stroke="none" />
+        <path d="M13 8 C9 4, 5 4, 1 8 C5 12, 9 12, 13 8 Z" strokeOpacity="0.7" />
+        <path d="M27 8 C31 4, 35 4, 39 8 C35 12, 31 12, 27 8 Z" strokeOpacity="0.7" />
+      </svg>
+      <span className="h-px w-16 bg-gradient-to-l from-transparent to-gold sm:w-28" />
+    </div>
+  );
+}
+
+/** Corner flourish for framed cards. Rotate via className (e.g. rotate-90). */
+export function CornerFlourish({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className={cn("h-10 w-10 text-gold", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1"
+      aria-hidden="true"
+    >
+      <path d="M2 46 V14 C2 7 7 2 14 2 H46" />
+      <path d="M8 40 V16 C8 11 11 8 16 8 H40" strokeOpacity="0.55" />
+      <circle cx="14" cy="14" r="2.2" fill="currentColor" stroke="none" />
+      <path d="M14 14 C20 14, 22 20, 28 20" strokeOpacity="0.7" />
+      <path d="M14 14 C14 20, 20 22, 20 28" strokeOpacity="0.7" />
+    </svg>
+  );
+}
+
+/** Soft scalloped band used as a section edge. */
+export function ScallopBand({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("block h-4 w-full text-gold-soft", className)}
+      preserveAspectRatio="none"
+      viewBox="0 0 240 16"
+      aria-hidden="true"
+    >
+      <defs>
+        <pattern id="ka-scallop" width="24" height="16" patternUnits="userSpaceOnUse">
+          <path d="M0 0 H24 V3 C24 11, 12 16, 12 16 C12 16, 0 11, 0 3 Z" fill="currentColor" />
+        </pattern>
+      </defs>
+      <rect width="240" height="16" fill="url(#ka-scallop)" />
+    </svg>
+  );
+}
+
+/** Brand emblem (also used as favicon source). */
+export function Emblem({ className }: { className?: string }) {
+  return (
+    <svg viewBox="-50 -50 100 100" className={cn("h-10 w-10", className)} aria-hidden="true">
+      <circle r="48" fill="var(--color-maroon)" />
+      <circle r="44" fill="none" stroke="var(--color-gold-soft)" strokeWidth="1" />
+      <g stroke="var(--color-gold-soft)" strokeWidth="1.1" fill="none">
+        {Array.from({ length: 8 }, (_, i) => (
+          <path key={i} d="M0 -38 C 6 -30, 6 -22, 0 -15 C -6 -22, -6 -30, 0 -38 Z" transform={`rotate(${i * 45})`} />
+        ))}
+        <circle r="11" />
+        <path d="M0 -8 L2.4 -2.4 L8 0 L2.4 2.4 L0 8 L-2.4 2.4 L-8 0 L-2.4 -2.4 Z" fill="var(--color-gold-soft)" stroke="none" />
+      </g>
+    </svg>
+  );
+}
+
+===== src\components\art\ZodiacWheel.tsx =====
+import { Mandala } from "@/components/art/Mandala";
+import { cn } from "@/lib/utils";
+
+/**
+ * Hero artwork: a mandala ringed by the twelve rÄÅ›i (zodiac) glyphs and
+ * nine graha (planet) markers. Pure SVG + text, so it stays sharp at any size.
+ * The U+FE0E selector forces text (not emoji) presentation of the glyphs.
+ */
+const RASHI = ["â™ˆ", "â™‰", "â™Š", "â™‹", "â™Œ", "â™", "â™Ž", "â™", "â™", "â™‘", "â™’", "â™“"];
+const GRAHA = ["â˜‰", "â˜½", "â™‚", "â˜¿", "â™ƒ", "â™€", "â™„", "â˜Š", "â˜‹"];
+const TEXT = "ï¸Ž";
+
+export function ZodiacWheel({ className }: { className?: string }) {
+  return (
+    <div className={cn("relative aspect-square w-full", className)} aria-hidden="true">
+      <Mandala className="absolute inset-[11%] h-[78%] w-[78%] text-gold" spin />
+      <svg viewBox="-100 -100 200 200" className="absolute inset-0 h-full w-full" fill="none">
+        <circle r="98" stroke="var(--color-gold)" strokeWidth="0.7" />
+        <circle r="80" stroke="var(--color-gold)" strokeOpacity="0.55" strokeWidth="0.5" />
+        {RASHI.map((g, i) => {
+          const a = ((i * 30 - 90) * Math.PI) / 180;
+          return (
+            <g key={g}>
+              <line
+                x1={80 * Math.cos(a + Math.PI / 12)}
+                y1={80 * Math.sin(a + Math.PI / 12)}
+                x2={98 * Math.cos(a + Math.PI / 12)}
+                y2={98 * Math.sin(a + Math.PI / 12)}
+                stroke="var(--color-gold)"
+                strokeOpacity="0.55"
+                strokeWidth="0.5"
+              />
+              <text
+                x={89 * Math.cos(a)}
+                y={89 * Math.sin(a)}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize="9"
+                fill="var(--color-maroon)"
+              >
+                {g + TEXT}
+              </text>
+            </g>
+          );
+        })}
+        {GRAHA.map((g, i) => {
+          const a = ((i * 40 - 90) * Math.PI) / 180;
+          return (
+            <g key={g}>
+              <circle cx={52 * Math.cos(a)} cy={52 * Math.sin(a)} r="6.2" fill="var(--color-ivory)" stroke="var(--color-gold)" strokeWidth="0.6" />
+              <text
+                x={52 * Math.cos(a)}
+                y={52 * Math.sin(a)}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize="7.5"
+                fill="var(--color-saffron-deep)"
+              >
+                {g + TEXT}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+===== src\components\site\Banners.tsx =====
+import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
+import { Container } from "@/components/ui";
+import type { SiteStatus } from "@/lib/data";
+import type { SiteSettings } from "@/lib/types";
+import { safeHref } from "@/lib/utils";
+
+/** Owner-configured announcement bar (Admin â†’ Settings). Rendered only when active. */
+export function AnnouncementBar({ settings }: { settings: SiteSettings }) {
+  if (!settings.announcement_active || !settings.announcement_text) return null;
+  const inner = <span>{settings.announcement_text}</span>;
+  return (
+    <div className="bg-maroon text-ivory">
+      <Container className="flex min-h-10 items-center justify-center py-2 text-center text-sm">
+        {settings.announcement_href ? (
+          <Link href={safeHref(settings.announcement_href)} className="underline-offset-4 hover:underline">
+            {inner}
+          </Link>
+        ) : (
+          inner
+        )}
+      </Container>
+    </div>
+  );
+}
+
+/** Shown when Supabase is missing or unreachable â€” never silently pretends data is saved. */
+export function SetupBanner({ site }: { site: SiteStatus }) {
+  if (site.status === "ok") return null;
+  return (
+    <div role="status" className="border-b border-saffron/40 bg-saffron-soft text-charcoal">
+      <Container className="flex items-start gap-3 py-3 text-sm">
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-saffron-deep" aria-hidden="true" />
+        <p>
+          <strong className="font-semibold">Setup required.</strong>{" "}
+          {site.status === "not_configured"
+            ? "Supabase is not configured, so this site is showing built-in draft content and booking is switched off. Nothing you see here is saved to a database. Add your keys to .env.local and run the migrations (see README)."
+            : site.reason}
+        </p>
+      </Container>
+    </div>
+  );
+}
+
+===== src\components\site\FaqList.tsx =====
+import { ChevronDown } from "lucide-react";
+import type { Faq } from "@/lib/types";
+
+/** Native <details>/<summary>: keyboard accessible, works without JavaScript. */
+export function FaqList({ faqs }: { faqs: Pick<Faq, "id" | "question" | "answer">[] }) {
+  if (faqs.length === 0) return null;
+  return (
+    <div className="mx-auto max-w-3xl divide-y divide-sand rounded-2xl border border-gold-soft bg-white-warm shadow-card">
+      {faqs.map((f) => (
+        <details key={f.id} className="group px-5 py-1 sm:px-7">
+          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-3 font-serif text-xl text-maroon [&::-webkit-details-marker]:hidden">
+            {f.question}
+            <ChevronDown
+              className="h-5 w-5 shrink-0 text-gold-deep transition-transform group-open:rotate-180"
+              aria-hidden="true"
+            />
+          </summary>
+          <p className="whitespace-pre-line pb-5 pr-8 text-ink-soft">{f.answer}</p>
+        </details>
+      ))}
+    </div>
+  );
+}
+
+===== src\components\site\Footer.tsx =====
+import Link from "next/link";
+import {
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Clock,
+} from "lucide-react";
+
+import { Emblem, ScallopBand } from "@/components/art/Ornaments";
+import { splitBrand } from "@/components/site/Header";
+import { Container } from "@/components/ui";
+import { GANESH_INVOCATION } from "@/lib/defaults";
+import type { SiteSettings } from "@/lib/types";
+import { whatsappLink } from "@/lib/utils";
+
+export function Footer({ settings }: { settings: SiteSettings }) {
+  const [line1, line2] = splitBrand(settings.brand_name);
+  const wa = whatsappLink(settings.whatsapp_number);
+
+  const year = new Date().getFullYear();
+  const footerText = settings.footer_text?.trim();
+
+  const copyright = footerText
+    ? footerText.startsWith("Â©") && !/\d{4}/.test(footerText)
+      ? `Â© ${year}${footerText.slice(1)}`
+      : footerText
+    : `Â© ${year} ${settings.brand_name}`;
+
+  return (
+    <footer className="mt-24 border-t border-gold-soft bg-parchment">
+      <ScallopBand className="-mt-px text-ivory" />
+
+      <Container className="grid gap-10 py-14 md:grid-cols-12">
+        {/* Brand */}
+        <div className="md:col-span-5">
+          <div className="flex items-center gap-3">
+            <Emblem className="h-12 w-12" />
+
+            <div className="leading-tight">
+              <p className="font-serif text-2xl font-semibold text-maroon">
+                {line1}
+              </p>
+
+              {line2 && (
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-saffron-deep">
+                  {line2}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <p className="mt-5 max-w-sm text-ink-soft">
+            {settings.tagline}
+          </p>
+
+          <p className="deva mt-5 text-lg text-maroon" lang="sa">
+            {GANESH_INVOCATION}
+          </p>
+        </div>
+
+        {/* Explore and policies */}
+        <nav aria-label="Footer" className="md:col-span-3">
+          <h2 className="eyebrow mb-4 font-sans">Explore</h2>
+
+          <ul className="space-y-2.5">
+            {[
+              ["/", "Home"],
+              ["/services", "Astrology consultations"],
+              ["/about", "About Neelabh Shivam"],
+              ["/book", "Book a session"],
+              ["/contact", "Contact"],
+            ].map(([href, label]) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  className="text-charcoal hover:text-maroon hover:underline"
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          <h2 className="eyebrow mb-4 mt-8 font-sans">Policies</h2>
+
+          <ul className="space-y-2.5">
+            {[
+              ["/privacy", "Privacy policy"],
+              ["/terms", "Terms and conditions"],
+              ["/cancellation-refund", "Cancellation & rescheduling"],
+            ].map(([href, label]) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  className="text-charcoal hover:text-maroon hover:underline"
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {/* Contact information */}
+        <div className="md:col-span-4">
+          <h2 className="eyebrow mb-4 font-sans">Contact</h2>
+
+          <ul className="space-y-3 text-charcoal">
+            {settings.contact_phone && (
+              <li className="flex items-start gap-3">
+                <Phone
+                  className="mt-1 h-4 w-4 shrink-0 text-gold-deep"
+                  aria-hidden="true"
+                />
+
+                <a
+                  href={`tel:${settings.contact_phone.replace(/[^\d+]/g, "")}`}
+                  className="hover:text-maroon hover:underline"
+                >
+                  {settings.contact_phone}
+                </a>
+              </li>
+            )}
+
+            {wa && (
+              <li className="flex items-start gap-3">
+                <MessageCircle
+                  className="mt-1 h-4 w-4 shrink-0 text-gold-deep"
+                  aria-hidden="true"
+                />
+
+                <a
+                  href={wa}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-maroon hover:underline"
+                >
+                  WhatsApp
+                </a>
+              </li>
+            )}
+
+            {settings.contact_email && (
+              <li className="flex items-start gap-3">
+                <Mail
+                  className="mt-1 h-4 w-4 shrink-0 text-gold-deep"
+                  aria-hidden="true"
+                />
+
+                <a
+                  href={`mailto:${settings.contact_email}`}
+                  className="break-all hover:text-maroon hover:underline"
+                >
+                  {settings.contact_email}
+                </a>
+              </li>
+            )}
+
+            {settings.address && (
+              <li className="flex items-start gap-3">
+                <MapPin
+                  className="mt-1 h-4 w-4 shrink-0 text-gold-deep"
+                  aria-hidden="true"
+                />
+                <span>{settings.address}</span>
+              </li>
+            )}
+
+            {settings.hours_text && (
+              <li className="flex items-start gap-3">
+                <Clock
+                  className="mt-1 h-4 w-4 shrink-0 text-gold-deep"
+                  aria-hidden="true"
+                />
+                <span>{settings.hours_text}</span>
+              </li>
+            )}
+          </ul>
+        </div>
+      </Container>
+
+      {/* Copyright */}
+      <div className="border-t border-gold-soft">
+        <Container className="flex flex-col items-start justify-between gap-2 py-5 text-sm text-ink-soft sm:flex-row sm:items-center">
+          <p>{copyright}</p>
+
+          <p>
+            Consultations are for guidance and reflection; no outcome is
+            guaranteed.
+          </p>
+        </Container>
+      </div>
+    </footer>
+  );
+} 
+
+===== src\components\site\Header.tsx =====
+import Link from "next/link";
+import { Emblem } from "@/components/art/Ornaments";
+import { MobileNav } from "@/components/site/MobileNav";
+import { ButtonLink, Container } from "@/components/ui";
+
+export const NAV_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/services", label: "Services" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
+
+/** "Karmic Ascension â€“ Vedic Astrologyâ„¢" â†’ two lines for the logo lockup. */
+export function splitBrand(name: string): [string, string | null] {
+  const i = name.search(/\s[â€“â€”-]\s/);
+  if (i === -1) return [name, null];
+  return [name.slice(0, i), name.slice(i).replace(/^\s[â€“â€”-]\s/, "")];
+}
+
+export function Header({ brandName }: { brandName: string }) {
+  const [line1, line2] = splitBrand(brandName);
+  return (
+    <header className="sticky top-0 z-30 border-b border-gold-soft bg-ivory/95 backdrop-blur supports-[backdrop-filter]:bg-ivory/85">
+      <Container className="relative flex h-16 items-center justify-between gap-4 sm:h-[4.5rem]">
+        <Link href="/" className="flex items-center gap-3" aria-label={`${brandName} â€“ home`}>
+          <Emblem className="h-10 w-10 shrink-0 sm:h-11 sm:w-11" />
+          <span className="leading-tight">
+            <span className="block font-serif text-xl font-semibold text-maroon sm:text-2xl">{line1}</span>
+            {line2 && (
+              <span className="block text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-saffron-deep">
+                {line2}
+              </span>
+            )}
+          </span>
+        </Link>
+
+        <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
+          {NAV_LINKS.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="rounded-full px-4 py-2 text-sm font-medium text-charcoal transition-colors hover:bg-parchment hover:text-maroon"
+            >
+              {l.label}
+            </Link>
+          ))}
+          <ButtonLink href="/book" size="md" className="ml-3">
+            Book a session
+          </ButtonLink>
+        </nav>
+
+        <MobileNav links={NAV_LINKS} />
+      </Container>
+    </header>
+  );
+}
+
+===== src\components\site\HomeSections.tsx =====
+import Link from "next/link";
+import { CalendarCheck, Compass, MessageCircle, Sparkles, Star, type LucideIcon } from "lucide-react";
+import { Mandala } from "@/components/art/Mandala";
+import { OrnamentDivider } from "@/components/art/Ornaments";
+import { ZodiacWheel } from "@/components/art/ZodiacWheel";
+import { FaqList } from "@/components/site/FaqList";
+import { ImageSlot } from "@/components/site/ImageSlot";
+import { Reveal } from "@/components/site/Reveal";
+import { ServiceCard } from "@/components/site/ServiceCard";
+import { ButtonLink, Container, RichText, SectionHeading } from "@/components/ui";
+import { GANESH_INVOCATION } from "@/lib/defaults";
+import type { Faq, Section, Service, SiteSettings, Testimonial } from "@/lib/types";
+import { safeHref, whatsappLink } from "@/lib/utils";
+
+export interface HomeData {
+  settings: SiteSettings;
+  services: Service[];
+  faqs: Faq[];
+  testimonials: Testimonial[];
+  bookable: boolean;
+}
+
+export function Hero({ s, settings, bookable }: { s: Section; settings: SiteSettings; bookable: boolean }) {
+  return (
+    <section className="relative overflow-hidden">
+      <Container className="grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-12 lg:gap-8 lg:py-20">
+        <div className="lg:col-span-7">
+          <p className="deva mb-4 text-xl text-gold-deep" lang="sa">
+            {GANESH_INVOCATION}
+          </p>
+          {s.eyebrow && <p className="eyebrow mb-4">{s.eyebrow}</p>}
+          <h1 className="text-5xl text-maroon sm:text-6xl lg:text-[4.25rem]">{s.heading}</h1>
+          {s.body && <p className="mt-6 max-w-xl text-lg text-ink-soft sm:text-xl">{s.body}</p>}
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            {bookable ? (
+              <ButtonLink href={safeHref(s.ctaHref, "/book")} size="lg">
+                {s.ctaLabel || "Book a consultation"}
+              </ButtonLink>
+            ) : (
+              <ButtonLink href="/contact" size="lg">
+                Contact to book
+              </ButtonLink>
+            )}
+            <ButtonLink href="/services" variant="secondary" size="lg">
+              Explore consultations
+            </ButtonLink>
+          </div>
+          {settings.hours_text && (
+            <p className="mt-6 text-sm text-ink-soft">
+              Consultations: <span className="font-semibold text-charcoal">{settings.hours_text}</span>
+            </p>
+          )}
+        </div>
+
+        <div className="lg:col-span-5">
+          {s.imageUrl ? (
+            <ImageSlot
+              src={s.imageUrl}
+              alt={s.imageAlt}
+              shape="arch"
+              priority
+              sizes="(min-width: 1024px) 40vw, 90vw"
+              className="mx-auto aspect-[4/5] w-full max-w-sm sm:max-w-md"
+            />
+          ) : (
+            <ZodiacWheel className="mx-auto max-w-sm sm:max-w-md" />
+          )}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+export function Intro({ s }: { s: Section }) {
+  return (
+    <section className="py-14 sm:py-20">
+      <Container narrow>
+        <Reveal>
+          <OrnamentDivider className="mb-8" />
+          <SectionHeading eyebrow={s.eyebrow} title={s.heading} description={s.body} />
+        </Reveal>
+      </Container>
+    </section>
+  );
+}
+
+export function ServicesSection({ s, data }: { s: Section; data: HomeData }) {
+  return (
+    <section className="py-14 sm:py-20">
+      <Container>
+        <SectionHeading eyebrow={s.eyebrow} title={s.heading} description={s.body} />
+        {data.services.length === 0 ? (
+          <p className="mx-auto mt-10 max-w-md rounded-2xl border border-dashed border-gold bg-white-warm p-8 text-center text-ink-soft">
+            Consultations will be listed here soon. Please get in touch to enquire.
+          </p>
+        ) : (
+          <div className="mt-12 flex flex-wrap justify-center gap-6">
+            {data.services.map((svc, i) => (
+              <Reveal key={svc.id} delay={i * 0.06} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+                <ServiceCard service={svc} bookable={data.bookable} />
+              </Reveal>
+            ))}
+          </div>
+        )}
+        {s.ctaHref && s.ctaLabel && (
+          <div className="mt-10 text-center">
+            <ButtonLink href={safeHref(s.ctaHref)} variant="secondary">
+              {s.ctaLabel}
+            </ButtonLink>
+          </div>
+        )}
+      </Container>
+    </section>
+  );
+}
+
+export function Prayer({ s }: { s: Section }) {
+  return (
+    <section className="border-y border-gold-soft bg-parchment py-14 sm:py-20">
+      <Container narrow>
+        <Reveal className="text-center">
+          <p className="eyebrow mb-3">{s.eyebrow}</p>
+          {s.heading && <h2 className="text-2xl text-maroon sm:text-3xl">{s.heading}</h2>}
+          <blockquote className="deva mx-auto mt-8 max-w-2xl whitespace-pre-line text-2xl text-maroon sm:text-3xl" lang="sa">
+            {s.body}
+          </blockquote>
+          {s.items.length > 0 && (
+            <dl className="mx-auto mt-10 grid max-w-3xl gap-6 text-left sm:grid-cols-2">
+              {s.items.map((it) => (
+                <div key={it.title} className="rounded-xl border border-gold-soft bg-white-warm p-5">
+                  <dt className="eyebrow mb-2">{it.title}</dt>
+                  <dd className="text-ink-soft">{it.text}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </Reveal>
+      </Container>
+    </section>
+  );
+}
+
+const WHY_ICONS: LucideIcon[] = [Compass, Sparkles, CalendarCheck];
+
+export function Why({ s }: { s: Section }) {
+  if (s.items.length === 0) return null;
+  return (
+    <section className="py-14 sm:py-20">
+      <Container>
+        <SectionHeading eyebrow={s.eyebrow} title={s.heading} description={s.body} />
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {s.items.map((it, i) => {
+            const Icon = WHY_ICONS[i % WHY_ICONS.length];
+            return (
+              <Reveal key={it.title} delay={i * 0.06}>
+                <div className="ornate-frame h-full rounded-2xl p-7">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-gold bg-parchment text-maroon">
+                    <Icon className="h-6 w-6" aria-hidden="true" />
+                  </span>
+                  <h3 className="mt-5 text-2xl text-maroon">{it.title}</h3>
+                  <p className="mt-2 text-ink-soft">{it.text}</p>
+                </div>
+              </Reveal>
+            );
+          })}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+export function Process({ s }: { s: Section }) {
+  if (s.items.length === 0) return null;
+  return (
+    <section className="bg-white-warm py-14 sm:py-20">
+      <Container>
+        <SectionHeading eyebrow={s.eyebrow} title={s.heading} description={s.body} />
+        <ol className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {s.items.map((it, i) => (
+            <li key={it.title} className="relative">
+              <span
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-maroon font-serif text-xl text-ivory"
+                aria-hidden="true"
+              >
+                {i + 1}
+              </span>
+              <h3 className="mt-4 text-xl text-maroon">
+                <span className="sr-only">Step {i + 1}: </span>
+                {it.title}
+              </h3>
+              <p className="mt-1.5 text-ink-soft">{it.text}</p>
+            </li>
+          ))}
+        </ol>
+      </Container>
+    </section>
+  );
+}
+
+export function AboutTeaser({ s }: { s: Section }) {
+  return (
+    <section className="py-14 sm:py-20">
+      <Container className="grid items-center gap-10 md:grid-cols-12">
+        <div className="md:col-span-5">
+          <ImageSlot
+            src={s.imageUrl}
+            alt={s.imageAlt || "Neelabh Shivam"}
+            shape="arch"
+            className="mx-auto aspect-[4/5] w-full max-w-xs md:max-w-none"
+            sizes="(min-width: 768px) 40vw, 80vw"
+          />
+        </div>
+        <Reveal className="md:col-span-7">
+          {s.eyebrow && <p className="eyebrow mb-3">{s.eyebrow}</p>}
+          <h2 className="text-4xl text-maroon sm:text-5xl">{s.heading}</h2>
+          <RichText text={s.body} className="mt-5 text-lg" />
+          {s.ctaHref && s.ctaLabel && (
+            <ButtonLink href={safeHref(s.ctaHref)} variant="secondary" className="mt-7">
+              {s.ctaLabel}
+            </ButtonLink>
+          )}
+        </Reveal>
+      </Container>
+    </section>
+  );
+}
+
+export function Testimonials({ s, items }: { s: Section; items: Testimonial[] }) {
+  // Only verified + published testimonials ever reach this component.
+  if (items.length === 0) return null;
+  return (
+    <section className="bg-white-warm py-14 sm:py-20">
+      <Container>
+        <SectionHeading eyebrow={s.eyebrow} title={s.heading} description={s.body} />
+        <ul className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {items.map((t) => (
+            <li key={t.id} className="ornate-frame rounded-2xl p-7">
+              {t.rating && (
+                <p className="mb-3 flex gap-0.5 text-saffron" aria-label={`${t.rating} out of 5 stars`}>
+                  {Array.from({ length: t.rating }, (_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-current" aria-hidden="true" />
+                  ))}
+                </p>
+              )}
+              <blockquote className="whitespace-pre-line font-serif text-xl text-charcoal">â€œ{t.quote}â€</blockquote>
+              <p className="mt-4 text-sm font-semibold text-maroon">
+                {t.author_name}
+                {t.author_detail && <span className="font-normal text-ink-soft"> Â· {t.author_detail}</span>}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </Container>
+    </section>
+  );
+}
+
+export function Faqs({ s, faqs }: { s: Section; faqs: Faq[] }) {
+  if (faqs.length === 0) return null;
+  return (
+    <section className="py-14 sm:py-20">
+      <Container>
+        <SectionHeading eyebrow={s.eyebrow} title={s.heading} description={s.body} />
+        <div className="mt-10">
+          <FaqList faqs={faqs} />
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+export function FinalCta({ s, settings, bookable }: { s: Section; settings: SiteSettings; bookable: boolean }) {
+  const wa = whatsappLink(settings.whatsapp_number, "Namaste, I would like to ask about a consultation.");
+  return (
+    <section className="py-14 sm:py-20">
+      <Container>
+        <div className="ornate-frame grid items-center gap-8 rounded-3xl bg-parchment p-8 sm:p-12 md:grid-cols-12">
+          <div className="md:col-span-8">
+            <h2 className="text-3xl text-maroon sm:text-4xl">{s.heading}</h2>
+            {s.body && <p className="mt-4 max-w-xl text-lg text-ink-soft">{s.body}</p>}
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              {bookable ? (
+                <ButtonLink href={safeHref(s.ctaHref, "/book")} size="lg">
+                  {s.ctaLabel || "Book a consultation"}
+                </ButtonLink>
+              ) : (
+                <ButtonLink href="/contact" size="lg">
+                  Contact us
+                </ButtonLink>
+              )}
+              {wa && (
+                <a
+                  href={wa}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-gold bg-white-warm px-7 text-base font-semibold text-maroon hover:bg-ivory"
+                >
+                  <MessageCircle className="h-5 w-5" aria-hidden="true" />
+                  WhatsApp
+                  <span className="sr-only"> (opens in a new tab)</span>
+                </a>
+              )}
+            </div>
+            <p className="mt-5 text-sm text-ink-soft">
+              Prefer to read first? See the{" "}
+              <Link href="/cancellation-refund" className="font-semibold text-maroon underline underline-offset-2">
+                rescheduling policy
+              </Link>
+              .
+            </p>
+          </div>
+          <div className="hidden md:col-span-4 md:block">
+            <Mandala className="mx-auto w-full max-w-[16rem] text-gold" />
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+===== src\components\site\ImageSlot.tsx =====
+import Image from "next/image";
+import { Mandala } from "@/components/art/Mandala";
+import { cn } from "@/lib/utils";
+
+/**
+ * Reusable image slot. Shows the admin-selected image when one is set,
+ * otherwise an intentional ornamental placeholder (original SVG art, no text),
+ * so the layout never looks broken before real photography is added.
+ * Photos are managed in Admin â†’ Media and chosen per section / service.
+ */
+export function ImageSlot({
+  src,
+  alt,
+  className,
+  sizes = "(min-width: 1024px) 480px, 100vw",
+  priority = false,
+  shape = "rounded",
+}: {
+  src?: string | null;
+  alt?: string;
+  className?: string;
+  sizes?: string;
+  priority?: boolean;
+  shape?: "rounded" | "arch";
+}) {
+  const radius = shape === "arch" ? "rounded-t-[999px] rounded-b-2xl" : "rounded-2xl";
+  if (src) {
+    const local = /\/\/(localhost|127\.0\.0\.1)/.test(src);
+    return (
+      <div className={cn("ornate-frame relative overflow-hidden", radius, className)}>
+        <Image
+          src={src}
+          alt={alt ?? ""}
+          fill
+          sizes={sizes}
+          priority={priority}
+          unoptimized={local}
+          className="object-cover"
+        />
+      </div>
+    );
+  }
+  return (
+    <div
+      className={cn(
+        "ornate-frame relative flex items-center justify-center overflow-hidden bg-parchment",
+        radius,
+        className,
+      )}
+      role="img"
+      aria-label={alt || "Decorative mandala"}
+    >
+      <Mandala className="h-[78%] w-[78%] text-gold" />
+    </div>
+  );
+}
+
+===== src\components\site\LegalPage.tsx =====
+import { notFound } from "next/navigation";
+import { AlertTriangle } from "lucide-react";
+import { Container, RichText } from "@/components/ui";
+import { getPageContent, sectionByKey } from "@/lib/data";
+
+/** Shared renderer for the three policy pages (editable in Admin â†’ Website content). */
+export async function LegalPage({ slug }: { slug: string }) {
+  const page = await getPageContent(slug);
+  if (page.notFound) notFound();
+  const body = sectionByKey(page.sections, "legal_body");
+
+  return (
+    <section className="py-14 sm:py-20">
+      <Container narrow>
+        <h1 className="text-4xl text-maroon sm:text-5xl">{body?.heading || page.meta.title}</h1>
+        {page.meta.isDraft && (
+          <p
+            role="note"
+            className="mt-6 flex items-start gap-3 rounded-xl border border-saffron/40 bg-saffron-soft p-4 text-sm text-charcoal"
+          >
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-saffron-deep" aria-hidden="true" />
+            Draft policy text â€” pending review by the site owner.
+          </p>
+        )}
+        <RichText text={body?.body} className="mt-8 text-lg" />
+      </Container>
+    </section>
+  );
+}
+
+===== src\components\site\MobileNav.tsx =====
+
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { Menu, X } from "lucide-react";
+import { buttonStyles } from "@/components/ui";
+
+type NavLink = {
+  href: string;
+  label: string;
+};
+
+export function MobileNav({ links }: { links: NavLink[] }) {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
+  function closeMenu() {
+    setOpen(false);
+  }
+
+  return (
+    <div className="relative md:hidden">
+      <button
+        ref={toggleRef}
+        type="button"
+        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-gold-soft bg-white-warm text-maroon"
+        aria-expanded={open}
+        aria-controls="mobile-menu"
+        aria-label={open ? "Close menu" : "Open menu"}
+        onClick={() => setOpen((current) => !current)}
+      >
+        {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
+
+      {open && (
+        <div
+          id="mobile-menu"
+          className="absolute inset-x-0 top-full z-40 border-b border-gold-soft bg-ivory px-5 pb-6 pt-3 shadow-lift"
+        >
+          <nav aria-label="Mobile navigation">
+            <ul className="flex flex-col">
+              {links.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    aria-current={
+                      pathname === link.href ? "page" : undefined
+                    }
+                    onClick={closeMenu}
+                    className="flex min-h-12 items-center border-b border-sand/70 font-serif text-xl text-maroon aria-[current=page]:text-saffron-deep"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <Link
+              href="/book"
+              onClick={closeMenu}
+              className={buttonStyles("primary", "lg", "mt-5 w-full")}
+            >
+              Book a consultation
+            </Link>
+          </nav>
+        </div>
+      )}
+    </div>
+  );
+}
+
+===== src\components\site\Reveal.tsx =====
+"use client";
+
+import { motion, useReducedMotion } from "framer-motion";
+import type { ReactNode } from "react";
+
+/** Subtle fade-and-rise on scroll. Does nothing for users who prefer reduced motion. */
+export function Reveal({
+  children,
+  delay = 0,
+  className,
+}: {
+  children: ReactNode;
+  delay?: number;
+  className?: string;
+}) {
+  const reduce = useReducedMotion();
+  if (reduce) return <div className={className}>{children}</div>;
+  return (
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.5, delay, ease: "easeOut" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+===== src\components\site\ServiceCard.tsx =====
+import Link from "next/link";
+import { ArrowRight, Clock } from "lucide-react";
+import { ImageSlot } from "@/components/site/ImageSlot";
+import { ButtonLink } from "@/components/ui";
+import type { Service } from "@/lib/types";
+import { formatDuration, formatPrice } from "@/lib/utils";
+
+/** Price in rupees (converted from paise) or "Price on request" when the price is NULL. */
+export function PriceTag({ service }: { service: Pick<Service, "price_paise" | "currency"> }) {
+  const price = formatPrice(service.price_paise, service.currency);
+  return price ? (
+    <span className="font-serif text-2xl font-semibold text-maroon">{price}</span>
+  ) : (
+    <span className="text-base font-semibold text-ink-soft">Price on request</span>
+  );
+}
+
+export function ServiceCard({ service, bookable }: { service: Service; bookable: boolean }) {
+  return (
+    <article className="ornate-frame group flex h-full flex-col overflow-hidden rounded-2xl transition-shadow hover:shadow-lift">
+      <ImageSlot
+        src={service.imageUrl}
+        alt={service.imageAlt || service.title}
+        className="aspect-[16/10] w-full rounded-none border-0 shadow-none before:hidden"
+        sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
+      />
+      <div className="flex flex-1 flex-col p-6">
+        <h3 className="text-2xl text-maroon">
+          <Link href={`/services/${service.slug}`} className="after:absolute after:inset-0 hover:underline">
+            {service.title}
+          </Link>
+        </h3>
+        {service.short_description && <p className="mt-2 flex-1 text-ink-soft">{service.short_description}</p>}
+        <div className="mt-5 flex items-end justify-between gap-3 border-t border-sand pt-4">
+          <div>
+            <PriceTag service={service} />
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-soft">
+              <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+              {formatDuration(service.duration_minutes)}
+            </p>
+          </div>
+          <span className="relative z-10 inline-flex items-center gap-1 text-sm font-semibold text-maroon">
+            Details <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          </span>
+        </div>
+        {/* The booking link carries the service slug; /book pre-selects that service. */}
+        {bookable ? (
+          <ButtonLink href={`/book?service=${encodeURIComponent(service.slug)}`} size="md" className="relative z-10 mt-4 w-full">
+            Book this consultation
+          </ButtonLink>
+        ) : (
+          <ButtonLink href="/contact" variant="secondary" size="md" className="relative z-10 mt-4 w-full">
+            Contact to book
+          </ButtonLink>
+        )}
+      </div>
+    </article>
+  );
+}
+
+/** 1 column on mobile, 2 on tablet, 3 on desktop. A short last row is centred. */
+export function ServicesGrid({ services, bookable }: { services: Service[]; bookable: boolean }) {
+  return (
+    <ul className="flex flex-wrap justify-center gap-6">
+      {services.map((s) => (
+        <li key={s.id} className="flex w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+          <div className="w-full">
+            <ServiceCard service={s} bookable={bookable} />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Placeholder shown by loading.tsx while the page streams in. Same footprint as a real card. */
+export function ServiceCardSkeleton() {
+  return (
+    <div className="ornate-frame h-full overflow-hidden rounded-2xl" aria-hidden="true">
+      <div className="aspect-[16/10] w-full animate-pulse bg-parchment" />
+      <div className="space-y-3 p-6">
+        <div className="h-7 w-3/4 animate-pulse rounded bg-sand" />
+        <div className="h-4 w-full animate-pulse rounded bg-parchment" />
+        <div className="h-4 w-5/6 animate-pulse rounded bg-parchment" />
+        <div className="mt-6 h-12 w-full animate-pulse rounded-full bg-sand" />
+      </div>
+    </div>
+  );
+}
+
+===== src\components\ui\index.tsx =====
+import Link from "next/link";
+import type { ComponentProps, ReactNode } from "react";
+import { cn } from "@/lib/utils";
+
+export function Container({
+  className,
+  children,
+  narrow = false,
+}: {
+  className?: string;
+  children: ReactNode;
+  narrow?: boolean;
+}) {
+  return (
+    <div className={cn("mx-auto w-full px-5 sm:px-8", narrow ? "max-w-3xl" : "max-w-6xl", className)}>
+      {children}
+    </div>
+  );
+}
+
+type Variant = "primary" | "secondary" | "ghost" | "danger";
+type Size = "md" | "lg" | "sm";
+
+export function buttonStyles(variant: Variant = "primary", size: Size = "md", className?: string) {
+  return cn(
+    "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-colors",
+    "disabled:cursor-not-allowed disabled:opacity-60",
+    size === "lg" && "min-h-12 px-7 text-base",
+    size === "md" && "min-h-11 px-5 text-sm",
+    size === "sm" && "min-h-9 px-4 text-sm",
+    variant === "primary" &&
+      "bg-maroon text-ivory shadow-card hover:bg-maroon-deep",
+    variant === "secondary" &&
+      "border border-gold bg-white-warm text-maroon hover:bg-parchment",
+    variant === "ghost" && "text-maroon hover:bg-maroon-soft",
+    variant === "danger" && "border border-danger bg-white-warm text-danger hover:bg-red-50",
+    className,
+  );
+}
+
+export function ButtonLink({
+  variant,
+  size,
+  className,
+  ...props
+}: ComponentProps<typeof Link> & { variant?: Variant; size?: Size }) {
+  return <Link className={buttonStyles(variant, size, className)} {...props} />;
+}
+
+export function Button({
+  variant,
+  size,
+  className,
+  ...props
+}: ComponentProps<"button"> & { variant?: Variant; size?: Size }) {
+  return <button className={buttonStyles(variant, size, className)} {...props} />;
+}
+
+export function SectionHeading({
+  eyebrow,
+  title,
+  description,
+  align = "center",
+  as: Tag = "h2",
+  className,
+}: {
+  eyebrow?: string | null;
+  title?: string | null;
+  description?: string | null;
+  align?: "center" | "left";
+  as?: "h1" | "h2";
+  className?: string;
+}) {
+  if (!eyebrow && !title && !description) return null;
+  return (
+    <div className={cn(align === "center" ? "mx-auto text-center" : "text-left", "max-w-2xl", className)}>
+      {eyebrow && <p className="eyebrow mb-3">{eyebrow}</p>}
+      {title && (
+        <Tag className="text-3xl text-maroon sm:text-4xl md:text-[2.75rem]">{title}</Tag>
+      )}
+      {description && <p className="mt-4 text-lg text-ink-soft">{description}</p>}
+    </div>
+  );
+}
+
+export function Badge({
+  children,
+  tone = "gold",
+}: {
+  children: ReactNode;
+  tone?: "gold" | "maroon" | "green" | "grey" | "red" | "saffron";
+}) {
+  const tones = {
+    gold: "bg-parchment text-gold-deep border-gold-soft",
+    maroon: "bg-maroon-soft text-maroon border-maroon/20",
+    green: "bg-green-50 text-success border-green-200",
+    grey: "bg-stone-100 text-stone-700 border-stone-200",
+    red: "bg-red-50 text-danger border-red-200",
+    saffron: "bg-saffron-soft text-saffron-deep border-saffron/30",
+  } as const;
+  return (
+    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold", tones[tone])}>
+      {children}
+    </span>
+  );
+}
+
+/** Splits plain text into paragraphs; "## Heading" lines become h2. */
+export function RichText({ text, className }: { text: string | null | undefined; className?: string }) {
+  if (!text) return null;
+  const blocks = text.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
+  return (
+    <div className={cn("prose-ka text-ink-soft", className)}>
+      {blocks.map((b, i) => {
+        if (b.startsWith("## ")) {
+          const [head, ...rest] = b.split("\n");
+          return (
+            <div key={i}>
+              <h2>{head.slice(3)}</h2>
+              {rest.length > 0 && <p className="whitespace-pre-line">{rest.join("\n")}</p>}
+            </div>
+          );
+        }
+        return (
+          <p key={i} className="whitespace-pre-line">
+            {b}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
+===== src\lib\booking\config.ts =====
+import "server-only";
+import { isSupabaseConfigured } from "@/lib/env";
+import { isServiceRoleConfigured } from "@/lib/supabase/admin";
+
+export type BookingMode =
+  | { enabled: true }
+  | { enabled: false; reason: "supabase_missing" | "service_key_missing" };
+
+/**
+ * Online booking needs the database AND the server-only service key (used solely
+ * for the validated create_booking() call). Without them the site stays usable and
+ * visitors are pointed to WhatsApp / e-mail instead.
+ */
+export function getBookingMode(): BookingMode {
+  if (!isSupabaseConfigured) return { enabled: false, reason: "supabase_missing" };
+  if (!isServiceRoleConfigured()) return { enabled: false, reason: "service_key_missing" };
+  return { enabled: true };
+}
+
+===== src\lib\booking\slots.ts =====
+// Pure slot logic (no framework imports) so it is easy to unit-test.
+// Business time zone: Asia/Kolkata = UTC+05:30, no daylight saving.
+
+export const TZ = "Asia/Kolkata";
+const IST_OFFSET = "+05:30";
+
+export interface SlotRule {
+  weekday: number; // 0 = Sunday
+  start_time: string; // "HH:MM" or "HH:MM:SS"
+  end_time: string;
+  is_active: boolean;
+}
+
+export interface SlotUnavailable {
+  starts_at: string;
+  ends_at: string;
+}
+
+export interface SlotSettings {
+  slot_minutes: number;
+  buffer_minutes: number;
+  min_notice_hours: number;
+  max_advance_days: number;
+}
+
+export interface Slot {
+  startsAt: string; // ISO (UTC)
+  label: string; // "7:00 PM"
+}
+
+export const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** IST wall-clock date + "HH:MM" â†’ absolute Date. */
+export function istToDate(date: string, hhmm: string): Date {
+  return new Date(`${date}T${hhmm.slice(0, 5)}:00${IST_OFFSET}`);
+}
+
+/** Today's (or any instant's) calendar date in IST as YYYY-MM-DD. */
+export function istDateString(d: Date): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+  return parts; // en-CA â†’ YYYY-MM-DD
+}
+
+export function addDays(date: string, n: number): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Weekday (0=Sun) of a calendar date; independent of time zone. */
+export function weekdayOf(date: string): number {
+  return new Date(`${date}T00:00:00Z`).getUTCDay();
+}
+
+const toMinutes = (t: string): number => {
+  const [h, m] = t.split(":");
+  return Number(h) * 60 + Number(m);
+};
+
+const pad = (n: number) => String(n).padStart(2, "0");
+
+export function formatTimeIst(d: Date): string {
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: TZ,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  })
+    .format(d)
+    .toUpperCase();
+}
+
+export function formatDateTimeIst(iso: string): string {
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: TZ,
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date(iso));
+}
+
+export function formatDateIst(date: string): string {
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: "UTC",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${date}T00:00:00Z`));
+}
+
+export function generateSlots(args: {
+  date: string; // YYYY-MM-DD (IST)
+  durationMinutes: number;
+  rules: SlotRule[];
+  settings: SlotSettings;
+  unavailable: SlotUnavailable[];
+  now?: Date;
+}): Slot[] {
+  const { date, durationMinutes, rules, settings, unavailable } = args;
+  const now = args.now ?? new Date();
+  if (!DATE_RE.test(date)) return [];
+
+  const rule = rules.find((r) => r.weekday === weekdayOf(date) && r.is_active);
+  if (!rule) return [];
+
+  const earliest = now.getTime() + settings.min_notice_hours * 3_600_000;
+  const latest = now.getTime() + (settings.max_advance_days + 1) * 86_400_000;
+  const step = Math.max(5, settings.slot_minutes);
+  const startMin = toMinutes(rule.start_time);
+  const endMin = toMinutes(rule.end_time);
+  const busy = unavailable.map((u) => ({
+    s: new Date(u.starts_at).getTime(),
+    e: new Date(u.ends_at).getTime(),
+  }));
+
+  const slots: Slot[] = [];
+  for (let m = startMin; m + durationMinutes <= endMin; m += step) {
+    const start = istToDate(date, `${pad(Math.floor(m / 60))}:${pad(m % 60)}`);
+    const t = start.getTime();
+    if (t < earliest || t > latest) continue;
+    const held = t + (durationMinutes + settings.buffer_minutes) * 60_000;
+    if (busy.some((b) => t < b.e && held > b.s)) continue;
+    slots.push({ startsAt: start.toISOString(), label: formatTimeIst(start) });
+  }
+  return slots;
+}
+
+/** Candidate dates (IST) in the booking window whose weekday has an active rule. */
+export function candidateDates(rules: SlotRule[], settings: SlotSettings, now = new Date()): string[] {
+  const active = new Set(rules.filter((r) => r.is_active).map((r) => r.weekday));
+  const today = istDateString(now);
+  const out: string[] = [];
+  for (let i = 0; i <= settings.max_advance_days; i++) {
+    const d = addDays(today, i);
+    if (active.has(weekdayOf(d))) out.push(d);
+  }
+  return out;
+}
+
+===== src\lib\supabase\server.ts =====
+import "server-only";
+import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+import { supabaseKey, supabaseUrl } from "@/lib/env";
+
+/**
+ * Session-aware client (reads the signed-in user's cookies). Uses the public
+ * key, so every query is subject to Row Level Security as that user.
+ * Admin CRUD uses this client â€” RLS (is_admin()) is the real enforcement.
+ */
+export async function createClient() {
+  const cookieStore = await cookies();
+  return createServerClient(supabaseUrl!, supabaseKey!, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(list) {
+        try {
+          list.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+        } catch {
+          // Called from a Server Component: cookies are refreshed in proxy.ts instead.
+        }
+      },
+    },
+  });
+}
+
+/**
+ * Cookie-less anonymous client for public content. Because it does not touch
+ * cookies(), pages that use it can be statically generated / revalidated.
+ */
+export function createPublicClient() {
+  return createSupabaseClient(supabaseUrl!, supabaseKey!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+===== src\lib\data.ts =====
+import "server-only";
+import { cache } from "react";
+import { isSupabaseConfigured, MEDIA_BUCKET, supabaseUrl } from "@/lib/env";
+import { createPublicClient } from "@/lib/supabase/server";
+import {
+  DEFAULT_PAGES,
+  DEFAULT_SERVICES,
+  DEFAULT_SETTINGS,
+  getDefaultPage,
+  type DefaultPage,
+} from "@/lib/defaults";
+import type {
+  AvailabilityRule,
+  Faq,
+  PageMeta,
+  Section,
+  SectionItem,
+  Service,
+  SiteSettings,
+  Testimonial,
+  UnavailableRange,
+} from "@/lib/types";
+
+export type SiteStatus =
+  | { status: "ok" }
+  | { status: "not_configured" }
+  | { status: "error"; reason: string };
+
+export function mediaPublicUrl(storagePath: string | null | undefined): string | null {
+  if (!storagePath || !supabaseUrl) return null;
+  return `${supabaseUrl.replace(/\/$/, "")}/storage/v1/object/public/${MEDIA_BUCKET}/${storagePath}`;
+}
+
+function logError(scope: string, err: unknown) {
+  console.error(`[data:${scope}]`, err instanceof Error ? err.message : err);
+}
+
+/* ------------------------------------------------------------------ settings */
+
+export const getSettingsResult = cache(
+  async (): Promise<{ settings: SiteSettings; site: SiteStatus }> => {
+    if (!isSupabaseConfigured) {
+      return { settings: DEFAULT_SETTINGS, site: { status: "not_configured" } };
+    }
+    try {
+      const sb = createPublicClient();
+      const { data, error } = await sb.from("site_settings").select("*").eq("id", 1).maybeSingle();
+      if (error) throw error;
+      if (!data) {
+        return {
+          settings: DEFAULT_SETTINGS,
+          site: {
+            status: "error",
+            reason: "No site_settings row found. Run supabase/seed.sql after the migrations.",
+          },
+        };
+      }
+      return { settings: data as SiteSettings, site: { status: "ok" } };
+    } catch (e) {
+      logError("settings", e);
+      return {
+        settings: DEFAULT_SETTINGS,
+        site: {
+          status: "error",
+          reason: "Could not read from Supabase. Check your keys and that the migrations were run.",
+        },
+      };
+    }
+  },
+);
+
+export async function getSettings(): Promise<SiteSettings> {
+  return (await getSettingsResult()).settings;
+}
+
+/* --------------------------------------------------------------------- pages */
+
+function toSection(
+  def: DefaultPage["sections"][number] | undefined,
+  row?: Record<string, unknown>,
+): Section {
+  if (row) {
+    const media = Array.isArray(row.media) ? row.media[0] : row.media;
+    const m = media as { storage_path?: string; alt_text?: string } | null | undefined;
+    return {
+      key: String(row.section_key),
+      eyebrow: (row.eyebrow as string | null) ?? null,
+      heading: (row.heading as string | null) ?? null,
+      body: (row.body as string | null) ?? null,
+      items: Array.isArray(row.items) ? (row.items as SectionItem[]) : [],
+      ctaLabel: (row.cta_label as string | null) ?? null,
+      ctaHref: (row.cta_href as string | null) ?? null,
+      imageUrl: mediaPublicUrl(m?.storage_path),
+      imageAlt: m?.alt_text ?? "",
+      imageAssetId: (row.image_asset_id as string | null) ?? null,
+      sortOrder: Number(row.sort_order ?? 0),
+      isVisible: Boolean(row.is_visible),
+      isDraft: Boolean(row.is_draft),
+      isDefault: false,
+    };
+  }
+  const d = def!;
+  return {
+    key: d.key,
+    eyebrow: d.eyebrow ?? null,
+    heading: d.heading ?? null,
+    body: d.body ?? null,
+    items: d.items ?? [],
+    ctaLabel: d.ctaLabel ?? null,
+    ctaHref: d.ctaHref ?? null,
+    imageUrl: null,
+    imageAlt: "",
+    imageAssetId: null,
+    sortOrder: d.sortOrder,
+    isVisible: d.isVisible ?? true,
+    isDraft: d.draft ?? false,
+    isDefault: true,
+  };
+}
+
+function fromDefaults(def: DefaultPage | undefined, slug: string) {
+  return {
+    notFound: false as const,
+    meta: {
+      slug,
+      title: def?.title ?? slug,
+      metaTitle: def?.metaTitle ?? null,
+      metaDescription: def?.metaDescription ?? null,
+      isPublished: true,
+      isDraft: def?.draft ?? false,
+    } satisfies PageMeta,
+    sections: (def?.sections ?? []).map((s) => toSection(s)).sort((a, b) => a.sortOrder - b.sortOrder),
+  };
+}
+
+export type PageContent =
+  | { notFound: true }
+  | { notFound: false; meta: PageMeta; sections: Section[] };
+
+export const getPageContent = cache(async (slug: string): Promise<PageContent> => {
+  const def = getDefaultPage(slug);
+  if (!isSupabaseConfigured) return fromDefaults(def, slug);
+
+  try {
+    const sb = createPublicClient();
+    const { data: page, error } = await sb
+      .from("pages")
+      .select("id, slug, title, meta_title, meta_description, is_published, is_draft")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (error) throw error;
+
+    if (!page) {
+      // RLS hides unpublished pages: distinguish "unpublished" from "never created".
+      const { data: exists } = await sb.rpc("page_exists", { p_slug: slug });
+      if (exists) return { notFound: true };
+      return fromDefaults(def, slug);
+    }
+
+    const { data: rows, error: secErr } = await sb
+      .from("page_sections")
+      .select("*, media:media_assets(storage_path, alt_text)")
+      .eq("page_id", page.id);
+    if (secErr) throw secErr;
+
+    const byKey = new Map<string, Section>();
+    for (const d of def?.sections ?? []) byKey.set(d.key, toSection(d));
+    for (const r of rows ?? []) byKey.set(String(r.section_key), toSection(undefined, r));
+
+    // RLS hides hidden sections from anon, so a built-in default for the same key
+    // would reappear. Ask the database which keys the owner has hidden and drop them.
+    const { data: hidden } = await sb.rpc("hidden_section_keys", { p_slug: slug });
+    for (const key of (hidden as string[] | null) ?? []) byKey.delete(key);
+    const sections = [...byKey.values()].sort((a, b) => a.sortOrder - b.sortOrder);
+
+    return {
+      notFound: false,
+      meta: {
+        slug: page.slug,
+        title: page.title,
+        metaTitle: page.meta_title,
+        metaDescription: page.meta_description,
+        isPublished: page.is_published,
+        isDraft: page.is_draft,
+      },
+      sections,
+    };
+  } catch (e) {
+    logError(`page:${slug}`, e);
+    return fromDefaults(def, slug);
+  }
+});
+
+export function sectionByKey(sections: Section[], key: string): Section | undefined {
+  return sections.find((s) => s.key === key);
+}
+
+/* ------------------------------------------------------------------ services */
+
+function toService(r: Record<string, unknown>): Service {
+  const media = Array.isArray(r.media) ? r.media[0] : r.media;
+  const m = media as { storage_path?: string; alt_text?: string } | null | undefined;
+  return {
+    id: String(r.id),
+    slug: String(r.slug),
+    title: String(r.title),
+    short_description: String(r.short_description ?? ""),
+    description: String(r.description ?? ""),
+    price_paise: (r.price_paise as number | null) ?? null,
+    currency: String(r.currency ?? "INR"),
+    duration_minutes: Number(r.duration_minutes ?? 30),
+    features: Array.isArray(r.features) ? (r.features as string[]) : [],
+    deliverables: Array.isArray(r.deliverables) ? (r.deliverables as string[]) : [],
+    image_asset_id: (r.image_asset_id as string | null) ?? null,
+    imageUrl: mediaPublicUrl(m?.storage_path),
+    imageAlt: m?.alt_text ?? "",
+    status: r.status as Service["status"],
+    is_featured: Boolean(r.is_featured),
+    requires_birth_details: Boolean(r.requires_birth_details),
+    is_draft: Boolean(r.is_draft),
+    sort_order: Number(r.sort_order ?? 0),
+  };
+}
+
+/** Published services plus a flag telling "query failed" apart from "none published". */
+export const getServicesResult = cache(async (): Promise<{ services: Service[]; error: boolean }> => {
+  if (!isSupabaseConfigured) return { services: DEFAULT_SERVICES, error: false };
+  try {
+    const sb = createPublicClient();
+    const { data, error } = await sb
+      .from("services")
+      .select("*, media:media_assets(storage_path, alt_text)")
+      .eq("status", "published")
+      .order("sort_order", { ascending: true })
+      .order("title", { ascending: true });
+    if (error) throw error;
+    return { services: (data ?? []).map(toService), error: false };
+  } catch (e) {
+    logError("services", e);
+    return { services: [], error: true };
+  }
+});
+
+export async function getServices(): Promise<Service[]> {
+  return (await getServicesResult()).services;
+}
+
+export async function getFeaturedServices(): Promise<Service[]> {
+  const all = await getServices();
+  const featured = all.filter((s) => s.is_featured);
+  return (featured.length ? featured : all).slice(0, 3);
+}
+
+export async function getServiceBySlug(slug: string): Promise<Service | null> {
+  return (await getServices()).find((s) => s.slug === slug) ?? null;
+}
+
+/* ------------------------------------------------------- FAQs & testimonials */
+
+export const getFaqs = cache(async (serviceId?: string | null): Promise<Faq[]> => {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const sb = createPublicClient();
+    let q = sb
+      .from("faqs")
+      .select("*")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true });
+    q = serviceId ? q.eq("service_id", serviceId) : q.is("service_id", null);
+    const { data, error } = await q;
+    if (error) throw error;
+    return (data ?? []) as Faq[];
+  } catch (e) {
+    logError("faqs", e);
+    return [];
+  }
+});
+
+export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const sb = createPublicClient();
+    const { data, error } = await sb
+      .from("testimonials")
+      .select("*")
+      .eq("is_published", true)
+      .eq("is_verified", true)
+      .order("sort_order", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as Testimonial[];
+  } catch (e) {
+    logError("testimonials", e);
+    return [];
+  }
+});
+
+/* -------------------------------------------------------------- availability */
+
+export async function getAvailabilityRules(): Promise<AvailabilityRule[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const sb = createPublicClient();
+    const { data, error } = await sb
+      .from("availability_rules")
+      .select("weekday, start_time, end_time, is_active")
+      .order("weekday");
+    if (error) throw error;
+    return (data ?? []) as AvailabilityRule[];
+  } catch (e) {
+    logError("availability", e);
+    return [];
+  }
+}
+
+export async function getUnavailable(from: string, to: string): Promise<UnavailableRange[]> {
+  const sb = createPublicClient();
+  const { data, error } = await sb.rpc("get_unavailable", { p_from: from, p_to: to });
+  if (error) throw error;
+  return (data ?? []) as UnavailableRange[];
+}
+
+/** Public URL of the default Open Graph image chosen in Admin â†’ Settings (if any). */
+export async function getOgImageUrl(settings: SiteSettings): Promise<string | null> {
+  if (!isSupabaseConfigured || !settings.og_image_asset_id) return null;
+  try {
+    const sb = createPublicClient();
+    const { data } = await sb
+      .from("media_assets")
+      .select("storage_path")
+      .eq("id", settings.og_image_asset_id)
+      .maybeSingle();
+    return mediaPublicUrl(data?.storage_path);
+  } catch {
+    return null;
+  }
+}
+
+export { DEFAULT_PAGES };
+
+===== src\lib\defaults.ts =====
+import type { SiteSettings, SectionItem, Service } from "@/lib/types";
+
+/**
+ * Built-in content. It is used (a) when Supabase is not configured yet, and
+ * (b) to fill any section the owner has not edited in the database.
+ *
+ * SOURCE OF TRUTH: facts (brand, tagline, contact details, hours, payment
+ * methods, social links, Sanskrit prayers, service names) come from the
+ * existing website neelabhshivam.com. Nothing else is invented: no prices,
+ * credentials, testimonials, years of experience or guarantees.
+ * Copy marked `draft: true` is generic wording the owner should review.
+ */
+
+export const DEFAULT_SETTINGS: SiteSettings = {
+  brand_name: "Karmic Ascension â€“ Vedic Astrologyâ„¢",
+  tagline: "Resolve Pending Karma",
+  description:
+    "Book Vedic astrology consultation to know your pending karma for material and spiritual transformation.",
+  contact_email: "karmicascension@neelabhshivam.com",
+  contact_phone: "+91-8736066349",
+  whatsapp_number: "918736066349",
+  address: "Prayagraj, Uttar Pradesh, India",
+  hours_text: "7:00 pm â€“ 8:30 pm, by appointment",
+  facebook_url: "https://www.facebook.com/108654074765656",
+  instagram_url: "https://www.instagram.com/karmic_ascension_vedic_astro",
+  youtube_url: "https://www.youtube.com/@karmicascension",
+  astrosage_url: null,
+  paytm_phonepe_number: "8736066349",
+  gpay_upi_id: "neelabh.shivam.ns@okicici",
+  payment_instructions: null,
+  razorpay_link: null,
+  timezone: "Asia/Kolkata",
+  slot_minutes: 30,
+  buffer_minutes: 10,
+  min_notice_hours: 12,
+  max_advance_days: 30,
+  booking_policy_text: null,
+  announcement_text: null,
+  announcement_href: null,
+  announcement_active: false,
+  footer_text: "Â© Karmic Ascension - Vedic Astrologyâ„¢. All Rights Reserved.",
+  seo_title: null,
+  seo_description: null,
+  og_image_asset_id: null,
+};
+
+export const GANESH_INVOCATION = "à¥¥ à¤¶à¥à¤°à¥€ à¤—à¤£à¥‡à¤¶à¤¾à¤¯ à¤¨à¤®à¤ƒ à¥¥";
+
+export const NAVAGRAHA_SHLOKA =
+  "à¤Šà¤ à¤¬à¥à¤°à¤¹à¥à¤®à¤¾ à¤®à¥à¤°à¤¾à¤°à¥€ à¤¤à¥à¤°à¤¿à¤ªà¥à¤°à¤¾à¤‚à¤¤à¤•à¤¾à¤°à¥€ à¤­à¤¾à¤¨à¥: à¤¶à¤¶à¤¿ à¤­à¥‚à¤®à¤¿ à¤¸à¥à¤¤à¥‹ à¤¬à¥à¤§à¤¶à¥à¤šà¥¤\nà¤—à¥à¤°à¥à¤¶à¥à¤š à¤¶à¥à¤•à¥à¤° à¤¶à¤¨à¤¿ à¤°à¤¾à¤¹à¥ à¤•à¥‡à¤¤à¤µ à¤¸à¤°à¥à¤µà¥‡ à¤—à¥à¤°à¤¹à¤¾ à¤¶à¤¾à¤‚à¤¤à¤¿ à¤•à¤°à¤¾ à¤­à¤µà¤‚à¤¤à¥à¥¤à¥¤";
+
+export interface DefaultSection {
+  key: string;
+  sortOrder: number;
+  eyebrow?: string;
+  heading?: string;
+  body?: string;
+  items?: SectionItem[];
+  ctaLabel?: string;
+  ctaHref?: string;
+  isVisible?: boolean;
+  /** generic wording that the owner should review */
+  draft?: boolean;
+  /** short label shown in the admin editor */
+  label: string;
+}
+
+export interface DefaultPage {
+  slug: string;
+  title: string;
+  metaTitle?: string;
+  metaDescription: string;
+  draft?: boolean;
+  sections: DefaultSection[];
+}
+
+const LEGAL_NOTICE =
+  "This text is a draft prepared for owner review. Please have it reviewed before relying on it.";
+
+export const DEFAULT_PAGES: DefaultPage[] = [
+  {
+    slug: "home",
+    title: "Home",
+    metaTitle: "Karmic Ascension â€“ Vedic Astrologyâ„¢ | Resolve Pending Karma",
+    metaDescription: DEFAULT_SETTINGS.description,
+    sections: [
+      {
+        key: "hero",
+        label: "Hero",
+        sortOrder: 10,
+        eyebrow: "Vedic Astrology Â· Prayagraj",
+        heading: "Resolve Pending Karma",
+        body: DEFAULT_SETTINGS.description,
+        ctaLabel: "Book a consultation",
+        ctaHref: "/book",
+      },
+      {
+        key: "intro",
+        label: "Brand introduction",
+        sortOrder: 20,
+        draft: true,
+        eyebrow: "Karmic Ascension",
+        heading: "A Vedic reading of the karma still asking to be resolved",
+        body: "In Vedic astrology the birth chart is read as a map of the karma carried into this life. Karmic Ascension offers consultations that look at the pending karma indicated in your chart, for material and spiritual transformation.",
+      },
+      {
+        key: "services",
+        label: "Featured consultations (heading)",
+        sortOrder: 30,
+        eyebrow: "Consultations",
+        heading: "Choose your consultation",
+        body: "Select a consultation to see its details and book an appointment.",
+        ctaLabel: "View all consultations",
+        ctaHref: "/services",
+      },
+      {
+        key: "prayer",
+        label: "Navagraha prayer (verse from the existing site; transliteration and meaning added â€” please verify)",
+        sortOrder: 40,
+        draft: true,
+        eyebrow: "Navagraha Prayer",
+        heading: "A prayer for planetary peace",
+        body: NAVAGRAHA_SHLOKA,
+        items: [
+          {
+            title: "Transliteration",
+            text: "Om BrahmÄ MurÄri TripurÄntakÄrÄ« BhÄnuá¸¥ ÅšaÅ›Ä« BhÅ«mi-suto BudhaÅ›ca | GuruÅ›ca Åšukra Åšani RÄhu Ketavaá¸¥ sarve grahÄá¸¥ Å›ÄntikarÄ bhavantu ||",
+          },
+          {
+            title: "Meaning",
+            text: "May BrahmÄ, MurÄri (Viá¹£á¹‡u), TripurÄntakÄrÄ« (Åšiva), the Sun, the Moon, Mars, Mercury, Jupiter, Venus, Saturn, RÄhu and Ketu â€” all the planets â€” become bringers of peace.",
+          },
+        ],
+      },
+      {
+        key: "why",
+        label: "Why choose this approach",
+        sortOrder: 50,
+        draft: true,
+        eyebrow: "The approach",
+        heading: "Why choose this approach",
+        items: [
+          {
+            title: "Centred on karma",
+            text: "Consultations focus on the pending karma indicated in your birth chart.",
+          },
+          {
+            title: "Material and spiritual",
+            text: "The reading looks at worldly matters and spiritual growth together.",
+          },
+          {
+            title: "By appointment",
+            text: "Sessions are scheduled individually, with time set aside for you.",
+          },
+        ],
+      },
+      {
+        key: "process",
+        label: "Consultation process",
+        sortOrder: 60,
+        draft: true,
+        eyebrow: "How it works",
+        heading: "How a consultation works",
+        items: [
+          { title: "Choose a consultation", text: "Pick the consultation that suits you." },
+          {
+            title: "Select a date and time",
+            text: "Choose an open slot. Appointments are held between 7:00 pm and 8:30 pm (IST).",
+          },
+          {
+            title: "Share your details",
+            text: "Enter your contact details and, where required, your birth details.",
+          },
+          {
+            title: "Complete payment",
+            text: "Payment details are shown after you book. Your booking is confirmed once payment is verified.",
+          },
+        ],
+      },
+      {
+        key: "about",
+        label: "About the astrologer (teaser)",
+        sortOrder: 70,
+        eyebrow: "The astrologer",
+        heading: "Neelabh Shivam",
+        body: "Neelabh Shivam is the Vedic astrologer behind Karmic Ascension, based in Prayagraj, Uttar Pradesh, India.",
+        ctaLabel: "About Neelabh Shivam",
+        ctaHref: "/about",
+      },
+      {
+        key: "testimonials",
+        label: "Testimonials (heading) â€” shown only when verified testimonials exist",
+        sortOrder: 80,
+        eyebrow: "Client words",
+        heading: "What clients say",
+      },
+      {
+        key: "faqs",
+        label: "FAQs (heading)",
+        sortOrder: 90,
+        eyebrow: "Questions",
+        heading: "Frequently asked questions",
+      },
+      {
+        key: "cta",
+        label: "Contact & booking call to action",
+        sortOrder: 100,
+        heading: "Begin your consultation",
+        body: "Book a time that suits you, or reach out on WhatsApp if you have a question first.",
+        ctaLabel: "Book a consultation",
+        ctaHref: "/book",
+      },
+    ],
+  },
+  {
+    slug: "about",
+    title: "About Neelabh Shivam",
+    metaDescription:
+      "About Neelabh Shivam, Vedic astrologer behind Karmic Ascension in Prayagraj, Uttar Pradesh, India.",
+    sections: [
+      {
+        key: "about_intro",
+        label: "Introduction",
+        sortOrder: 10,
+        draft: true,
+        eyebrow: "The astrologer",
+        heading: "About Neelabh Shivam",
+        body: "Neelabh Shivam is the Vedic astrologer behind Karmic Ascension â€“ Vedic Astrologyâ„¢, based in Prayagraj, Uttar Pradesh, India.\n\nKarmic Ascension offers Vedic astrology consultations to understand pending karma for material and spiritual transformation.",
+      },
+      {
+        key: "about_story",
+        label: "Biography (owner to write â€” hidden until you add text and make it visible)",
+        sortOrder: 20,
+        draft: true,
+        isVisible: false,
+        heading: "My journey",
+        body: "",
+      },
+    ],
+  },
+  {
+    slug: "services",
+    title: "Astrology Consultations",
+    metaDescription:
+      "Vedic astrology consultations to know your pending karma for material and spiritual transformation.",
+    sections: [
+      {
+        key: "services_intro",
+        label: "Page introduction",
+        sortOrder: 10,
+        eyebrow: "Consultations",
+        heading: "Astrology consultations",
+        body: "Book a Vedic astrology consultation to know your pending karma for material and spiritual transformation.",
+      },
+    ],
+  },
+  {
+    slug: "contact",
+    title: "Contact",
+    metaDescription: "Contact Karmic Ascension â€“ Vedic Astrologyâ„¢ in Prayagraj, Uttar Pradesh, India.",
+    sections: [
+      {
+        key: "contact_intro",
+        label: "Page introduction",
+        sortOrder: 10,
+        eyebrow: "Get in touch",
+        heading: "Contact",
+        body: "Write or message with any question before you book. Consultations are held by appointment.",
+      },
+    ],
+  },
+  {
+    slug: "privacy",
+    title: "Privacy Policy",
+    metaDescription: "How Karmic Ascension â€“ Vedic Astrologyâ„¢ handles your personal information.",
+    draft: true,
+    sections: [
+      {
+        key: "legal_body",
+        label: "Policy text",
+        sortOrder: 10,
+        draft: true,
+        heading: "Privacy Policy",
+        body: `${LEGAL_NOTICE}\n\n## Information we collect\nWhen you book a consultation we collect your name, email address and phone number. For consultations that need a birth chart we also collect your date, time and place of birth, and any notes you choose to add.\n\n## How we use it\nYour information is used to schedule and deliver your consultation, to contact you about your booking and to verify your payment. We do not sell your personal information.\n\n## Storage and security\nBooking information is stored in a secured database that only the site owner can access. We do not store card details on this website.\n\n## Cookies\nThe website may use cookies for basic operation and traffic analysis.\n\n## Your choices\nYou can ask us to correct or delete your booking information by contacting us using the details on the Contact page.`,
+      },
+    ],
+  },
+  {
+    slug: "terms",
+    title: "Terms and Conditions",
+    metaDescription: "Terms and conditions for using Karmic Ascension â€“ Vedic Astrologyâ„¢.",
+    draft: true,
+    sections: [
+      {
+        key: "legal_body",
+        label: "Terms text",
+        sortOrder: 10,
+        draft: true,
+        heading: "Terms and Conditions",
+        body: `${LEGAL_NOTICE}\n\n## Nature of the service\nAstrology consultations are offered for guidance and spiritual reflection. They are not a substitute for professional medical, legal, financial or psychological advice, and no particular outcome is guaranteed.\n\n## Bookings\nA booking request reserves a time slot and remains pending until the owner confirms it. Appointments are held by appointment between the hours shown on the booking page (IST).\n\n## Payment\nPayment is made using the methods shown after booking. A booking is confirmed only after payment has been verified by the owner.\n\n## Your information\nYou agree to provide accurate details. Birth details are used to prepare your chart.\n\n## Changes\nThese terms may be updated from time to time.`,
+      },
+    ],
+  },
+  {
+    slug: "cancellation-refund",
+    title: "Cancellation, Refund and Rescheduling",
+    metaDescription: "Cancellation, refund and rescheduling policy for Karmic Ascension consultations.",
+    draft: true,
+    sections: [
+      {
+        key: "legal_body",
+        label: "Policy text",
+        sortOrder: 10,
+        draft: true,
+        heading: "Cancellation, Refund and Rescheduling",
+        body: `${LEGAL_NOTICE}\n\n## Rescheduling\nTo reschedule a consultation, contact us on WhatsApp, phone or email as early as possible, quoting your booking reference. Rescheduling depends on availability.\n\n## Cancellation\nTo cancel, contact us quoting your booking reference. The owner can cancel a booking from the admin dashboard.\n\n## Refunds\n[Owner to confirm: refund conditions, timeframes and processing method. The existing website publishes its cancellation and refund policy on a Razorpay-hosted page; copy those terms here once confirmed.]`,
+      },
+    ],
+  },
+];
+
+export function getDefaultPage(slug: string): DefaultPage | undefined {
+  return DEFAULT_PAGES.find((p) => p.slug === slug);
+}
+
+/**
+ * Services named on the existing website. The existing site shows NO prices,
+ * so price is left empty ("price on request"). Duration is a placeholder.
+ * Only shown when Supabase is not configured; booking is disabled in that mode.
+ */
+export const DEFAULT_SERVICES: Service[] = [
+  {
+    id: "default-vedic-astrology-consultation",
+    slug: "vedic-astrology-consultation",
+    title: "Vedic Astrology Consultation",
+    short_description:
+      "A Vedic astrology consultation to know your pending karma for material and spiritual transformation.",
+    description:
+      "A one-to-one Vedic astrology consultation focused on the pending karma indicated in your birth chart, for material and spiritual transformation.",
+    price_paise: null,
+    currency: "INR",
+    duration_minutes: 30,
+    features: [],
+    deliverables: [],
+    image_asset_id: null,
+    imageUrl: null,
+    imageAlt: "",
+    status: "published",
+    is_featured: true,
+    requires_birth_details: true,
+    is_draft: true,
+    sort_order: 10,
+    isDefault: true,
+  },
+  {
+    id: "default-pending-karma-reading",
+    slug: "pending-karma-reading",
+    title: "Pending Karma Reading",
+    short_description: "A reading centred on the karma still waiting to be resolved.",
+    description: "A reading that looks at the pending karma shown in your birth chart.",
+    price_paise: null,
+    currency: "INR",
+    duration_minutes: 30,
+    features: [],
+    deliverables: [],
+    image_asset_id: null,
+    imageUrl: null,
+    imageAlt: "",
+    status: "published",
+    is_featured: true,
+    requires_birth_details: true,
+    is_draft: true,
+    sort_order: 20,
+    isDefault: true,
+  },
+];
+
+===== src\lib\env.ts =====
+// NOTE: NEXT_PUBLIC_* variables must be referenced with literal property access
+// so Next.js can inline them into the client bundle.
+export const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+export const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+const looksLikePlaceholder = (v?: string) => !v || /YOUR-|your-project|example\.supabase/i.test(v);
+
+/** True only when real-looking Supabase URL + public key are present. */
+export const isSupabaseConfigured =
+  !looksLikePlaceholder(supabaseUrl) && !looksLikePlaceholder(supabaseKey);
+
+export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(
+  /\/$/,
+  "",
+);
+
+export const MEDIA_BUCKET = "site-media";
+
+===== src\lib\types.ts =====
+export interface SiteSettings {
+  brand_name: string;
+  tagline: string;
+  description: string;
+  contact_email: string | null;
+  contact_phone: string | null;
+  whatsapp_number: string | null;
+  address: string | null;
+  hours_text: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  youtube_url: string | null;
+  astrosage_url: string | null;
+  paytm_phonepe_number: string | null;
+  gpay_upi_id: string | null;
+  payment_instructions: string | null;
+  razorpay_link: string | null;
+  timezone: string;
+  slot_minutes: number;
+  buffer_minutes: number;
+  min_notice_hours: number;
+  max_advance_days: number;
+  booking_policy_text: string | null;
+  announcement_text: string | null;
+  announcement_href: string | null;
+  announcement_active: boolean;
+  footer_text: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  og_image_asset_id: string | null;
+}
+
+export interface SectionItem {
+  title: string;
+  text: string;
+}
+
+export interface Section {
+  key: string;
+  eyebrow: string | null;
+  heading: string | null;
+  body: string | null;
+  items: SectionItem[];
+  ctaLabel: string | null;
+  ctaHref: string | null;
+  imageUrl: string | null;
+  imageAlt: string;
+  imageAssetId: string | null;
+  sortOrder: number;
+  isVisible: boolean;
+  isDraft: boolean;
+  /** true when the value comes from built-in defaults rather than the database */
+  isDefault: boolean;
+}
+
+export interface PageMeta {
+  slug: string;
+  title: string;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  isPublished: boolean;
+  isDraft: boolean;
+}
+
+export interface Service {
+  id: string;
+  slug: string;
+  title: string;
+  short_description: string;
+  description: string;
+  price_paise: number | null;
+  currency: string;
+  duration_minutes: number;
+  features: string[];
+  deliverables: string[];
+  image_asset_id: string | null;
+  imageUrl: string | null;
+  imageAlt: string;
+  status: "draft" | "published" | "archived";
+  is_featured: boolean;
+  requires_birth_details: boolean;
+  is_draft: boolean;
+  sort_order: number;
+  /** true when served from built-in defaults (database not configured) */
+  isDefault?: boolean;
+}
+
+export interface Faq {
+  id: string;
+  service_id: string | null;
+  question: string;
+  answer: string;
+  sort_order: number;
+  is_published: boolean;
+}
+
+export interface Testimonial {
+  id: string;
+  author_name: string;
+  author_detail: string | null;
+  quote: string;
+  rating: number | null;
+  source: string | null;
+  is_verified: boolean;
+  is_published: boolean;
+  sort_order: number;
+}
+
+export interface AvailabilityRule {
+  id?: string;
+  weekday: number;
+  start_time: string; // "HH:MM:SS"
+  end_time: string;
+  is_active: boolean;
+}
+
+export interface UnavailableRange {
+  kind: "booking" | "blocked";
+  starts_at: string;
+  ends_at: string;
+}
+
+export interface MediaAsset {
+  id: string;
+  storage_path: string;
+  folder: string;
+  alt_text: string;
+  mime_type: string | null;
+  size_bytes: number | null;
+  created_at: string;
+  url: string;
+}
+
+export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed";
+export type PaymentStatus = "unpaid" | "pending_verification" | "paid" | "refunded" | "waived";
+
+export interface Booking {
+  id: string;
+  public_code: string;
+  service_id: string | null;
+  service_title: string;
+  service_price_paise: number | null;
+  currency: string;
+  duration_minutes: number;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  birth_date: string | null;
+  birth_time: string | null;
+  birth_place: string | null;
+  customer_notes: string | null;
+  starts_at: string;
+  ends_at: string;
+  status: BookingStatus;
+  payment_status: PaymentStatus;
+  payment_method: "manual" | "razorpay";
+  admin_notes: string | null;
+  created_at: string;
+}
+
+export type ActionState = {
+  ok: boolean;
+  message?: string;
+  errors?: Record<string, string>;
+  /** Submitted text values, returned on failure so forms can repopulate after React resets them. */
+  values?: Record<string, string>;
+} | null;
+
+===== src\lib\utils.ts =====
+export function cn(...parts: Array<string | false | null | undefined>): string {
+  return parts.filter(Boolean).join(" ");
+}
+
+export function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[Ì€-Í¯]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+/** 150000 paise â†’ "â‚¹1,500". null â†’ null (caller decides how to word "price on request"). */
+export function formatPrice(paise: number | null | undefined, currency = "INR"): string | null {
+  if (paise === null || paise === undefined) return null;
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: paise % 100 === 0 ? 0 : 2,
+  }).format(paise / 100);
+}
+
+/** "1500" or "1,500.50" â†’ paise (integer). Returns null for blank, NaN for invalid. */
+export function rupeesToPaise(input: string | null | undefined): number | null {
+  const v = (input ?? "").replace(/[,\sâ‚¹]/g, "").trim();
+  if (v === "") return null;
+  if (!/^\d+(\.\d{1,2})?$/.test(v)) return Number.NaN;
+  return Math.round(parseFloat(v) * 100);
+}
+
+export function paiseToRupeesInput(paise: number | null | undefined): string {
+  if (paise === null || paise === undefined) return "";
+  return paise % 100 === 0 ? String(paise / 100) : (paise / 100).toFixed(2);
+}
+
+export function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? `${h} hr` : `${h} hr ${m} min`;
+}
+
+/** Only allow same-site paths or http(s)/mailto/tel URLs from editable content. */
+export function safeHref(href: string | null | undefined, fallback = "#"): string {
+  if (!href) return fallback;
+  const v = href.trim();
+  if (v.startsWith("/") && !v.startsWith("//")) return v;
+  if (/^(https?:\/\/|mailto:|tel:)/i.test(v)) return v;
+  return fallback;
+}
+
+export function whatsappLink(number: string | null | undefined, text?: string): string | null {
+  const digits = (number ?? "").replace(/\D/g, "");
+  if (!digits) return null;
+  return `https://wa.me/${digits}${text ? `?text=${encodeURIComponent(text)}` : ""}`;
+}
+
+/** Lines "Title | Text" â†’ items. Lines without a pipe become title-only. */
+export function parseItems(raw: string): Array<{ title: string; text: string }> {
+  return raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const i = line.indexOf("|");
+      return i === -1
+        ? { title: line, text: "" }
+        : { title: line.slice(0, i).trim(), text: line.slice(i + 1).trim() };
+    });
+}
+
+export function itemsToText(items: Array<{ title: string; text: string }>): string {
+  return items.map((i) => (i.text ? `${i.title} | ${i.text}` : i.title)).join("\n");
+}
+
+export function parseLines(raw: string): string[] {
+  return raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+}
+
+===== src\lib\validation.ts =====
+import { z } from "zod";
+
+const emptyToUndef = (v: unknown) => (typeof v === "string" && v.trim() === "" ? undefined : v);
+// Absent (undefined) and blank optional fields both mean "not provided".
+const emptyToNull = (v: unknown) =>
+  v === undefined || (typeof v === "string" && v.trim() === "") ? null : v;
+
+/** optional trimmed text â†’ string | null */
+const optText = (max: number) =>
+  z.preprocess(emptyToNull, z.string().trim().max(max).nullable());
+
+const uuid = z.string().uuid();
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use the format YYYY-MM-DD.");
+const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/, "Use a time like 19:00.");
+
+/* ---------------------------------------------------------------- public: booking */
+
+export const bookingSchema = z.object({
+  service_id: uuid.or(z.literal("")).refine((v) => v !== "", "Please choose a consultation."),
+  starts_at: z
+    .string()
+    .refine((v) => v !== "" && !Number.isNaN(Date.parse(v)), "Please choose a date and time."),
+  name: z.string().trim().min(2, "Please enter your full name.").max(120),
+  email: z.string().trim().toLowerCase().email("Please enter a valid email address.").max(200),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^\+?[0-9()\-\s]{7,20}$/, "Please enter a valid phone number (7â€“20 digits)."),
+  birth_date: z.preprocess(emptyToUndef, isoDate.optional()),
+  birth_time: z.preprocess(emptyToUndef, hhmm.optional()),
+  birth_place: z.preprocess(emptyToUndef, z.string().trim().max(200).optional()),
+  notes: z.preprocess(emptyToUndef, z.string().trim().max(1000).optional()),
+  accept_terms: z.literal(true, { error: "Please accept the terms and policies to continue." }),
+  // Honeypot: real users never see or fill this field.
+  website: z.string().max(0).optional(),
+});
+
+export const slotQuerySchema = z.object({
+  service: z.string().trim().min(1).max(120),
+  date: isoDate,
+});
+
+/* ---------------------------------------------------------------- admin: auth */
+
+export const loginSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Enter a valid email address."),
+  password: z.string().min(1, "Enter your password.").max(200),
+  next: z.string().max(300).optional(),
+});
+
+/* -------------------------------------------------------------- admin: settings */
+
+const url = z.preprocess(
+  emptyToNull,
+  z
+    .string()
+    .trim()
+    .max(300)
+    .refine((v) => /^https?:\/\//i.test(v), "Must start with http:// or https://")
+    .nullable(),
+);
+
+export const settingsSchema = z.object({
+  brand_name: z.string().trim().min(2, "Brand name is required.").max(120),
+  tagline: z.string().trim().max(160),
+  description: z.string().trim().max(400),
+  contact_email: z.preprocess(emptyToNull, z.string().trim().email("Enter a valid email.").max(200).nullable()),
+  contact_phone: optText(30),
+  whatsapp_number: z.preprocess(
+    emptyToNull,
+    z
+      .string()
+      .trim()
+      .transform((v) => v.replace(/\D/g, ""))
+      .refine((v) => v.length >= 8 && v.length <= 15, "Enter digits with country code, e.g. 918736066349.")
+      .nullable(),
+  ),
+  address: optText(300),
+  hours_text: optText(200),
+  facebook_url: url,
+  instagram_url: url,
+  youtube_url: url,
+  astrosage_url: url,
+  paytm_phonepe_number: optText(30),
+  gpay_upi_id: optText(100),
+  payment_instructions: optText(1000),
+  slot_minutes: z.coerce.number().int().min(5).max(240),
+  buffer_minutes: z.coerce.number().int().min(0).max(120),
+  min_notice_hours: z.coerce.number().int().min(0).max(720),
+  max_advance_days: z.coerce.number().int().min(1).max(365),
+  booking_policy_text: optText(2000),
+  announcement_text: optText(300),
+  announcement_href: optText(300),
+  announcement_active: z.boolean(),
+  footer_text: optText(300),
+  seo_title: optText(120),
+  seo_description: optText(300),
+});
+
+/* ---------------------------------------------------------------- admin: content */
+
+export const pageMetaSchema = z.object({
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  title: z.string().trim().min(1, "Title is required.").max(160),
+  meta_title: optText(120),
+  meta_description: optText(300),
+  is_published: z.boolean(),
+  is_draft: z.boolean(),
+});
+
+export const sectionSchema = z.object({
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  section_key: z.string().regex(/^[a-z0-9_]+$/),
+  eyebrow: optText(120),
+  heading: optText(300),
+  body: optText(8000),
+  items_text: z.string().max(4000),
+  cta_label: optText(80),
+  cta_href: z.preprocess(
+    emptyToNull,
+    z
+      .string()
+      .trim()
+      .max(300)
+      .refine(
+        (v) => (v.startsWith("/") && !v.startsWith("//")) || /^(https?:\/\/|mailto:|tel:)/i.test(v),
+        "Use a path like /book or a full https:// link.",
+      )
+      .nullable(),
+  ),
+  image_asset_id: z.preprocess(emptyToNull, uuid.nullable()),
+  sort_order: z.coerce.number().int().min(0).max(10000),
+  is_visible: z.boolean(),
+  is_draft: z.boolean(),
+});
+
+/* --------------------------------------------------------------- admin: services */
+
+export const serviceSchema = z.object({
+  id: z.preprocess(emptyToUndef, uuid.optional()),
+  title: z.string().trim().min(2, "Title is required.").max(160),
+  slug: z.preprocess(
+    emptyToUndef,
+    z
+      .string()
+      .trim()
+      .toLowerCase()
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers and hyphens.")
+      .max(80)
+      .optional(),
+  ),
+  short_description: z.string().trim().max(300),
+  description: z.string().trim().max(8000),
+  price_rupees: z.string().trim().max(20),
+  duration_minutes: z.coerce.number().int().min(10, "Minimum 10 minutes.").max(480, "Maximum 480 minutes."),
+  features_text: z.string().max(4000),
+  deliverables_text: z.string().max(4000),
+  image_asset_id: z.preprocess(emptyToNull, uuid.nullable()),
+  status: z.enum(["draft", "published", "archived"]),
+  sort_order: z.coerce.number().int().min(0).max(10000),
+  is_featured: z.boolean(),
+  requires_birth_details: z.boolean(),
+  is_draft: z.boolean(),
+});
+
+/* ------------------------------------------------------ admin: FAQs/testimonials */
+
+export const faqSchema = z.object({
+  id: z.preprocess(emptyToUndef, uuid.optional()),
+  question: z.string().trim().min(3, "Enter the question.").max(300),
+  answer: z.string().trim().min(1, "Enter the answer.").max(4000),
+  service_id: z.preprocess(emptyToNull, uuid.nullable()),
+  sort_order: z.coerce.number().int().min(0).max(10000),
+  is_published: z.boolean(),
+});
+
+export const testimonialSchema = z
+  .object({
+    id: z.preprocess(emptyToUndef, uuid.optional()),
+    author_name: z.string().trim().min(1, "Enter the client's name.").max(120),
+    author_detail: optText(160),
+    quote: z.string().trim().min(3, "Enter the testimonial text.").max(2000),
+    rating: z.preprocess(emptyToNull, z.coerce.number().int().min(1).max(5).nullable()),
+    source: optText(200),
+    sort_order: z.coerce.number().int().min(0).max(10000),
+    is_verified: z.boolean(),
+    is_published: z.boolean(),
+  })
+  .refine((v) => !v.is_published || v.is_verified, {
+    path: ["is_published"],
+    message: "A testimonial can only be published after you tick â€œVerifiedâ€.",
+  });
+
+/* ------------------------------------------------------- admin: availability */
+
+export const weeklyHoursSchema = z
+  .object({
+    weekday: z.coerce.number().int().min(0).max(6),
+    start_time: hhmm,
+    end_time: hhmm,
+    is_active: z.boolean(),
+  })
+  .refine((v) => v.end_time > v.start_time, {
+    path: ["end_time"],
+    message: "End time must be after start time.",
+  });
+
+export const blockedDateSchema = z
+  .object({
+    blocked_on: isoDate,
+    start_time: z.preprocess(emptyToNull, hhmm.nullable()),
+    end_time: z.preprocess(emptyToNull, hhmm.nullable()),
+    reason: optText(200),
+  })
+  .refine((v) => (v.start_time === null) === (v.end_time === null), {
+    path: ["end_time"],
+    message: "Enter both a start and an end time, or leave both empty to block the whole day.",
+  })
+  .refine((v) => v.start_time === null || v.end_time === null || v.end_time > v.start_time, {
+    path: ["end_time"],
+    message: "End time must be after start time.",
+  });
+
+/* ----------------------------------------------------------------- admin: media */
+
+export const mediaMetaSchema = z.object({
+  id: uuid,
+  alt_text: z.string().trim().max(300),
+  folder: z.string().trim().min(1).max(60).regex(/^[a-z0-9-]+$/, "Use lowercase letters, numbers and hyphens."),
+});
+
+/* -------------------------------------------------------------- admin: bookings */
+
+export const bookingStatusSchema = z.object({
+  id: uuid,
+  status: z.enum(["pending", "confirmed", "cancelled", "completed"]),
+});
+
+export const bookingPaymentSchema = z.object({
+  id: uuid,
+  payment_status: z.enum(["unpaid", "pending_verification", "paid", "refunded", "waived"]),
+  reference: optText(200),
+});
+
+export const bookingNotesSchema = z.object({
+  id: uuid,
+  admin_notes: optText(4000),
+});
+
+export const bookingRescheduleSchema = z.object({
+  id: uuid,
+  date: isoDate,
+  time: hhmm,
+});

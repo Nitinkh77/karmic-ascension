@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Clock, Mail, MapPin, MessageCircle, Phone, type LucideIcon } from "lucide-react";
 import { Container, RichText, SectionHeading } from "@/components/ui";
+import { LeadForm } from "@/components/site/LeadForm";
 import { getPageContent, getSettings, sectionByKey } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
 import { whatsappLink } from "@/lib/utils";
@@ -60,6 +61,9 @@ export default async function ContactPage() {
         {rows.length === 0 && (
           <p className="mt-10 text-center text-ink-soft">Contact details will be added soon.</p>
         )}
+        <div className="mt-10">
+          <LeadForm source="contact-page" />
+        </div>
         <RichText text={s.booking_policy_text} className="mt-10" />
       </Container>
     </section>

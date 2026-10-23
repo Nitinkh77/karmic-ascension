@@ -15,6 +15,8 @@ import {
   bookingRescheduleSchema,
   bookingStatusSchema,
   faqSchema,
+  leadNotesSchema,
+  leadStatusSchema,
   mediaMetaSchema,
   pageMetaSchema,
   sectionSchema,
@@ -454,5 +456,40 @@ export async function rescheduleBooking(_p: ActionState, fd: FormData): Promise<
     if (error) return fail(dbErrorMessage(error));
     revalidatePath("/admin/bookings", "layout");
     return ok("Rescheduled. Remember to tell the customer.");
+  });
+}
+
+/* -------------------------------------------------------------------- leads */
+
+export async function setLeadStatus(_p: ActionState, fd: FormData): Promise<ActionState> {
+  return adminAction(async ({ supabase }) => {
+    const r = parseWith(leadStatusSchema, formToObject(fd));
+    if (!r.ok) return r.state;
+    const { error } = await supabase.from("leads").update({ status: r.data.status }).eq("id", r.data.id);
+    if (error) return fail(dbErrorMessage(error));
+    revalidatePath("/admin", "layout");
+    return ok(`Lead marked ${r.data.status}.`);
+  });
+}
+
+export async function saveLeadNotes(_p: ActionState, fd: FormData): Promise<ActionState> {
+  return adminAction(async ({ supabase }) => {
+    const r = parseWith(leadNotesSchema, formToObject(fd));
+    if (!r.ok) return r.state;
+    const { error } = await supabase.from("leads").update({ admin_notes: r.data.admin_notes }).eq("id", r.data.id);
+    if (error) return fail(dbErrorMessage(error));
+    revalidatePath("/admin/leads", "layout");
+    return ok("Note saved.");
+  });
+}
+
+export async function deleteLead(_p: ActionState, fd: FormData): Promise<ActionState> {
+  return adminAction(async ({ supabase }) => {
+    const id = String(fd.get("id") ?? "");
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return fail("Invalid lead.");
+    const { error } = await supabase.from("leads").delete().eq("id", id);
+    if (error) return fail(dbErrorMessage(error));
+    revalidatePath("/admin", "layout");
+    redirect("/admin/leads");
   });
 }

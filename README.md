@@ -45,15 +45,21 @@ The service-role key is read only in server code (`src/lib/supabase/admin.ts`) a
 
 ## 4. Create the database
 
-In the Supabase dashboard open **SQL Editor → New query**, then paste and run these files **in this order**:
+In the Supabase dashboard open **SQL Editor → New query**, then paste and run these files **in this order** (already applied the first four? run #5 and #6):
 
 1. `supabase/migrations/20261022000001_schema.sql` – tables, constraints, triggers
 2. `supabase/migrations/20261022000002_functions.sql` – booking function, public availability function
 3. `supabase/migrations/20261022000003_rls.sql` – Row Level Security
 4. `supabase/migrations/20261022000004_storage.sql` – `site-media` bucket + admin-only write policies
-5. `supabase/seed.sql` – settings, pages, the services named on the existing site, FAQs, weekly hours (seed is safe to re-run)
+5. `supabase/migrations/20261023000005_grants.sql` – explicit least-privilege table grants. **Required**: without it every query fails with `42501 permission denied for table …`
+6. `supabase/migrations/20261024000006_leads.sql` – lead generation: `leads` table (admin-only RLS) and the `create_lead()` function used by the website forms
+7. `supabase/seed.sql` – settings, pages, the services named on the existing site, FAQs, weekly hours (seed is safe to re-run)
 
 (Alternative with the CLI: `supabase link --project-ref <ref>` then `supabase db push`, then run `seed.sql` in the SQL Editor.)
+
+## 4b. Leads (enquiries)
+
+Visitors can send an enquiry from **Contact** and from every **service page**. Each enquiry needs a name, a phone or an email, and a ticked consent box. It is stored through `create_lead()` (server only, honeypot + rate limit + a durable limit of 3 per email/phone per 24 h) and appears in **Admin → Leads**, where you can search, filter, set the status (new → contacted → qualified → converted / lost), keep private notes, call / WhatsApp / email the person, delete a lead, and **Export CSV**. The dashboard shows how many leads are new. Nothing is sent by e-mail or WhatsApp automatically.
 
 ## 5. Create the first admin (secure)
 

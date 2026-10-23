@@ -252,3 +252,42 @@ export const bookingRescheduleSchema = z.object({
   date: isoDate,
   time: hhmm,
 });
+
+/* ------------------------------------------------------------------ leads */
+
+export const LEAD_STATUSES = ["new", "contacted", "qualified", "converted", "lost"] as const;
+
+/** Public enquiry form. At least one of email / phone is required, and consent is mandatory. */
+export const leadSchema = z
+  .object({
+    name: z.string().trim().min(2, "Please enter your name.").max(120),
+    email: z.preprocess(
+      emptyToUndef,
+      z.string().trim().toLowerCase().email("Please enter a valid email address.").max(200).optional(),
+    ),
+    phone: z.preprocess(
+      emptyToUndef,
+      z
+        .string()
+        .trim()
+        .regex(/^\+?[0-9()\-\s]{7,20}$/, "Please enter a valid phone number (7–20 digits).")
+        .optional(),
+    ),
+    message: z.preprocess(emptyToUndef, z.string().trim().max(1000, "Please keep your message under 1000 characters.").optional()),
+    service_id: z.preprocess(emptyToUndef, uuid.optional()),
+    source: z.preprocess(
+      emptyToUndef,
+      z
+        .string()
+        .trim()
+        .max(60)
+        .regex(/^[a-z0-9:_-]+$/i)
+        .optional(),
+    ),
+    consent: z.literal(true, { error: "Please tick the box so we may contact you about your enquiry." }),
+    website: z.string().max(0).optional(), // honeypot
+  })
+  .refine((v) => Boolean(v.email || v.phone), { path: ["phone"], message: "Please give a phone number or an email address." });
+
+export const leadStatusSchema = z.object({ id: uuid, status: z.enum(LEAD_STATUSES) });
+export const leadNotesSchema = z.object({ id: uuid, admin_notes: optText(4000) });

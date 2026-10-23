@@ -197,16 +197,35 @@ export function sectionByKey(sections: Section[], key: string): Section | undefi
 
 /* ------------------------------------------------------------------ services */
 
+function slugify(v: string): string {
+  return (
+    v
+      .toLowerCase()
+      .replace(/&/g, " and ")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "service"
+  );
+}
+
+/**
+ * Maps a `services` row to the app's Service type. It reads the columns this project's database actually
+ * has and tolerates the ones it may not: price comes from `price_cents` (hundredths of a rupee, i.e. paise)
+ * or `price_paise`; `slug`, `short_description` and `requires_birth_details` fall back to safe values.
+ */
 function toService(r: Record<string, unknown>): Service {
   const media = Array.isArray(r.media) ? r.media[0] : r.media;
   const m = media as { storage_path?: string; alt_text?: string } | null | undefined;
+  const rawPrice = r.price_cents ?? r.price_paise;
+  const description = String(r.description ?? "");
+  const title = String(r.title);
+  const isActive = "is_active" in r ? r.is_active === true : r.status === "published";
   return {
     id: String(r.id),
-    slug: String(r.slug),
-    title: String(r.title),
-    short_description: String(r.short_description ?? ""),
-    description: String(r.description ?? ""),
-    price_paise: (r.price_paise as number | null) ?? null,
+    slug: typeof r.slug === "string" && r.slug ? r.slug : slugify(title),
+    title,
+    short_description: String(r.short_description ?? "") || (description.length > 160 ? `${description.slice(0, 157).trimEnd()}…` : description),
+    description,
+    price_paise: typeof rawPrice === "number" ? rawPrice : null,
     currency: String(r.currency ?? "INR"),
     duration_minutes: Number(r.duration_minutes ?? 30),
     features: Array.isArray(r.features) ? (r.features as string[]) : [],
@@ -214,31 +233,43 @@ function toService(r: Record<string, unknown>): Service {
     image_asset_id: (r.image_asset_id as string | null) ?? null,
     imageUrl: mediaPublicUrl(m?.storage_path),
     imageAlt: m?.alt_text ?? "",
-    status: r.status as Service["status"],
+    status: isActive ? "published" : "draft",
     is_featured: Boolean(r.is_featured),
-    requires_birth_details: Boolean(r.requires_birth_details),
+    requires_birth_details: r.requires_birth_details === undefined ? true : Boolean(r.requires_birth_details),
     is_draft: Boolean(r.is_draft),
     sort_order: Number(r.sort_order ?? 0),
   };
 }
 
-export const getServices = cache(async (): Promise<Service[]> => {
-  if (!isSupabaseConfigured) return DEFAULT_SERVICES;
+/** Active services plus a flag telling "query failed" apart from "none active". Never falls back to made-up services once Supabase is configured. */
+export const getServicesResult = cache(async (): Promise<{ services: Service[]; error: boolean }> => {
+  if (!isSupabaseConfigured) return { services: DEFAULT_SERVICES, error: false };
   try {
     const sb = createPublicClient();
-    const { data, error } = await sb
-      .from("services")
-      .select("*, media:media_assets(storage_path, alt_text)")
-      .eq("status", "published")
-      .order("sort_order", { ascending: true })
-      .order("title", { ascending: true });
+    // `select *` so the query works with the real column set; filtering and ordering happen below.
+    const { data, error } = await sb.from("services").select("*");
     if (error) throw error;
-    return (data ?? []).map(toService);
+    const rows = (data ?? []) as Array<Record<string, unknown>>;
+    const active = rows.filter((r) => ("is_active" in r ? r.is_active === true : r.status === "published"));
+    const seen = new Set<string>();
+    const services = active.map(toService).map((s) => {
+      // Two active rows with the same title must still get distinct links.
+      let slug = s.slug;
+      if (seen.has(slug)) slug = `${slug}-${s.id.slice(0, 6)}`;
+      seen.add(slug);
+      return { ...s, slug };
+    });
+    services.sort((a, b) => a.sort_order - b.sort_order || a.title.localeCompare(b.title));
+    return { services, error: false };
   } catch (e) {
     logError("services", e);
-    return [];
+    return { services: [], error: true };
   }
 });
+
+export async function getServices(): Promise<Service[]> {
+  return (await getServicesResult()).services;
+}
 
 export async function getFeaturedServices(): Promise<Service[]> {
   const all = await getServices();

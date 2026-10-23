@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Check, Clock, MessageCircle } from "lucide-react";
 import { ImageSlot } from "@/components/site/ImageSlot";
 import { FaqList } from "@/components/site/FaqList";
+import { LeadForm } from "@/components/site/LeadForm";
 import { PriceTag } from "@/components/site/ServiceCard";
 import { ButtonLink, Container, RichText } from "@/components/ui";
 import { getBookingMode } from "@/lib/booking/config";
@@ -116,7 +117,7 @@ export default async function ServiceDetailPage({ params }: Props) {
               <div className="mt-6 space-y-3">
                 {bookable ? (
                   <ButtonLink href={`/book?service=${service.slug}`} size="lg" className="w-full">
-                    Book this consultation
+                    Book This Service
                   </ButtonLink>
                 ) : (
                   <ButtonLink href="/contact" size="lg" className="w-full">
@@ -148,6 +149,15 @@ export default async function ServiceDetailPage({ params }: Props) {
             <FaqList faqs={faqs} />
           </section>
         )}
+
+        <div className="mx-auto mt-16 max-w-2xl">
+          <LeadForm
+            source={`service:${service.slug}`}
+            serviceId={service.isDefault ? null : service.id}
+            title={`Ask about ${service.title}`}
+            intro="Not ready to book? Send your question and we will reply personally."
+          />
+        </div>
       </Container>
     </article>
   );
