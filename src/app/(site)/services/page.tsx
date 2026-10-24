@@ -8,6 +8,9 @@ import { getBookingMode } from "@/lib/booking/config";
 import { getPageContent, getServicesResult, sectionByKey } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
 
+// Re-read the database at most once a minute so admin edits show up without a redeploy.
+export const revalidate = 60;
+
 export const generateMetadata = (): Promise<Metadata> => pageMetadata("services", "/services");
 
 export default async function ServicesPage() {

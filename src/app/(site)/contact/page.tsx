@@ -7,6 +7,9 @@ import { getPageContent, getSettings, sectionByKey } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
 import { whatsappLink } from "@/lib/utils";
 
+// Re-read the database at most once a minute so admin edits show up without a redeploy.
+export const revalidate = 60;
+
 export const generateMetadata = (): Promise<Metadata> => pageMetadata("contact", "/contact");
 
 export default async function ContactPage() {

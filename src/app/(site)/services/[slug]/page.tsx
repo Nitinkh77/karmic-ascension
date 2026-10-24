@@ -11,6 +11,9 @@ import { getBookingMode } from "@/lib/booking/config";
 import { getFaqs, getServiceBySlug, getSettings } from "@/lib/data";
 import { formatDuration, whatsappLink } from "@/lib/utils";
 
+// Re-read the database at most once a minute so admin edits show up without a redeploy.
+export const revalidate = 60;
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
