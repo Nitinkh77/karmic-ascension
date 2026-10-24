@@ -71,7 +71,7 @@ export function AdminSidebar() {
 export function AdminMobileNav() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="lg:hidden">
+    <div className="shrink-0 lg:hidden">
       <button
         type="button"
         className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-sand bg-white-warm"
@@ -86,7 +86,7 @@ export function AdminMobileNav() {
         <nav
           id="admin-mobile-nav"
           aria-label="Admin"
-          className="absolute inset-x-0 top-full z-30 border-b border-sand bg-white-warm p-4 shadow-lift"
+          className="absolute inset-x-0 top-full z-30 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-sand bg-white-warm p-4 shadow-lift"
         >
           <NavList onNavigate={() => setOpen(false)} />
         </nav>

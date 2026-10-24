@@ -85,7 +85,26 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
       ) : (
         <>
           <p className="mb-2 text-sm text-ink-soft">Showing {rows.length}{count && count > rows.length ? ` of ${count}` : ""} bookings</p>
-          <div className="overflow-x-auto rounded-2xl border border-sand bg-white-warm">
+          <ul className="space-y-3 md:hidden" aria-label="Bookings">
+            {rows.map((b) => (
+              <li key={b.id}>
+                <Link href={`/admin/bookings/${b.id}`} className="block rounded-2xl border border-sand bg-white-warm p-4 hover:bg-ivory">
+                  <span className="flex flex-wrap items-start justify-between gap-2">
+                    <span className="min-w-0 font-semibold text-maroon">{formatDateTimeIst(b.starts_at)}</span>
+                    <Badge tone={statusTone[b.status]}>{b.status}</Badge>
+                  </span>
+                  <span className="mt-1 block break-words font-semibold text-charcoal">{b.customer_name}</span>
+                  <span className="block break-words text-sm text-ink-soft">{b.customer_phone}</span>
+                  <span className="mt-2 block break-words text-sm">{b.service_title} · {formatPrice(b.service_price_paise, b.currency) ?? "Price on request"}</span>
+                  <span className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-mono text-xs text-ink-soft">{b.public_code}</span>
+                    <Badge tone={payTone[b.payment_status]}>{b.payment_status.replace("_", " ")}</Badge>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-x-auto rounded-2xl md:block border border-sand bg-white-warm">
             <table className="w-full min-w-[720px] text-left text-sm">
               <caption className="sr-only">Bookings</caption>
               <thead className="border-b border-sand bg-parchment text-xs uppercase tracking-wide text-ink-soft">

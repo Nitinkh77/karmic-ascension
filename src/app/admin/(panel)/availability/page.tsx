@@ -32,27 +32,29 @@ export default async function AvailabilityPage() {
       <Card>
         <h2 className="mb-4 text-xl text-maroon">Weekly working hours</h2>
         <AdminForm action={saveWeeklyHours} submitLabel="Save weekly hours">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[480px] text-left text-sm">
-              <caption className="sr-only">Weekly working hours</caption>
-              <thead className="text-xs uppercase tracking-wide text-ink-soft">
-                <tr><th scope="col" className="py-2">Day</th><th scope="col">Working</th><th scope="col">From</th><th scope="col">To</th></tr>
-              </thead>
-              <tbody className="divide-y divide-sand">
-                {DAYS.map((d, i) => {
-                  const r = byDay.get(i);
-                  return (
-                    <tr key={d}>
-                      <th scope="row" className="py-3 font-semibold">{d}</th>
-                      <td><input type="checkbox" name={`active_${i}`} defaultChecked={r?.is_active} className="h-5 w-5 accent-maroon" aria-label={`${d} working`} /></td>
-                      <td><input type="time" name={`start_${i}`} defaultValue={hhmm(r?.start_time ?? "19:00")} className="field !w-32" aria-label={`${d} start`} /></td>
-                      <td><input type="time" name={`end_${i}`} defaultValue={hhmm(r?.end_time ?? "20:30")} className="field !w-32" aria-label={`${d} end`} /></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <ul className="divide-y divide-sand" aria-label="Weekly working hours">
+            {DAYS.map((d, i) => {
+              const r = byDay.get(i);
+              return (
+                <li key={d} className="grid gap-3 py-3 sm:grid-cols-[9rem_1fr] sm:items-center">
+                  <label className="flex min-h-11 items-center gap-3 font-semibold">
+                    <input type="checkbox" name={`active_${i}`} defaultChecked={r?.is_active} className="h-5 w-5 shrink-0 accent-maroon" />
+                    {d}
+                  </label>
+                  <div className="grid grid-cols-2 gap-3 sm:max-w-sm">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-ink-soft">
+                      From
+                      <input type="time" name={`start_${i}`} defaultValue={hhmm(r?.start_time ?? "19:00")} className="field mt-1 text-base normal-case tracking-normal text-charcoal" aria-label={`${d} start`} />
+                    </label>
+                    <label className="text-xs font-semibold uppercase tracking-wide text-ink-soft">
+                      To
+                      <input type="time" name={`end_${i}`} defaultValue={hhmm(r?.end_time ?? "20:30")} className="field mt-1 text-base normal-case tracking-normal text-charcoal" aria-label={`${d} end`} />
+                    </label>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         </AdminForm>
       </Card>
 
@@ -73,7 +75,7 @@ export default async function AvailabilityPage() {
           <h2 className="mb-4 text-xl text-maroon">Block a date or time range</h2>
           <AdminForm action={addBlockedDate} submitLabel="Block" resetOnSuccess>
             <Field label="Date (IST)" name="blocked_on"><input id="blocked_on" name="blocked_on" type="date" min={today} required className="field" /></Field>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 min-[420px]:grid-cols-2">
               <Field label="From (optional)" name="start_time"><input id="start_time" name="start_time" type="time" className="field" /></Field>
               <Field label="To (optional)" name="end_time"><input id="end_time" name="end_time" type="time" className="field" /></Field>
             </div>
@@ -87,8 +89,8 @@ export default async function AvailabilityPage() {
           {!blocked?.length ? <Empty>Nothing blocked.</Empty> : (
             <ul className="divide-y divide-sand">
               {blocked.map((b) => (
-                <li key={b.id} className="flex items-center justify-between gap-3 py-3 text-sm">
-                  <span>
+                <li key={b.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
+                  <span className="min-w-0 break-words">
                     <span className="block font-semibold">{formatDateIst(b.blocked_on)}</span>
                     <span className="block text-ink-soft">{b.start_time ? `${hhmm(b.start_time)}–${hhmm(b.end_time!)}` : "Whole day"}{b.reason ? ` · ${b.reason}` : ""}</span>
                   </span>
@@ -107,8 +109,8 @@ export default async function AvailabilityPage() {
         {!booked?.length ? <Empty>No upcoming pending or confirmed bookings.</Empty> : (
           <ul className="divide-y divide-sand text-sm">
             {booked.map((b) => (
-              <li key={b.id} className="flex justify-between gap-3 py-2.5">
-                <span><span className="font-semibold">{formatDateTimeIst(b.starts_at)}</span> · {b.customer_name} · {b.service_title}</span>
+              <li key={b.id} className="flex flex-col gap-1 py-2.5 sm:flex-row sm:justify-between sm:gap-3">
+                <span className="min-w-0 break-words"><span className="font-semibold">{formatDateTimeIst(b.starts_at)}</span> · {b.customer_name} · {b.service_title}</span>
                 <span className="capitalize text-ink-soft">{b.status}</span>
               </li>
             ))}

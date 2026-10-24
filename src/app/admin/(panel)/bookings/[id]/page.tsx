@@ -40,10 +40,10 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
       </PageTitle>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+        <div className="min-w-0 space-y-6 lg:col-span-2">
           <Card>
             <h2 className="mb-4 text-xl text-maroon">Details</h2>
-            <dl className="grid gap-4 text-sm sm:grid-cols-2">
+            <dl className="grid grid-cols-1 gap-4 text-sm [overflow-wrap:anywhere] sm:grid-cols-2 [&>div]:min-w-0">
               {[
                 ["Reference", b.public_code],
                 ["Service (as booked)", b.service_title],
@@ -99,7 +99,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
           </Card>
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Card>
             <h2 className="mb-3 text-xl text-maroon">Booking status</h2>
             <AdminForm action={setBookingStatus} submitLabel="Update status">

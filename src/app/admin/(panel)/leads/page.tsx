@@ -75,7 +75,22 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       ) : (
         <>
           <p className="mb-2 text-sm text-ink-soft">Showing {rows.length}{count && count > rows.length ? ` of ${count}` : ""} leads</p>
-          <div className="overflow-x-auto rounded-2xl border border-sand bg-white-warm">
+          <ul className="space-y-3 md:hidden" aria-label="Leads">
+            {rows.map((l) => (
+              <li key={l.id}>
+                <Link href={`/admin/leads/${l.id}`} className="block rounded-2xl border border-sand bg-white-warm p-4 hover:bg-ivory">
+                  <span className="flex flex-wrap items-start justify-between gap-2">
+                    <span className="min-w-0 break-words font-semibold text-maroon">{l.name}</span>
+                    <Badge tone={leadTone[l.status]}>{l.status}</Badge>
+                  </span>
+                  <span className="mt-1 block break-words text-sm text-ink-soft">{[l.phone, l.email].filter(Boolean).join(" · ")}</span>
+                  <span className="mt-2 block break-words text-sm">{l.service_id ? (titles.get(l.service_id) ?? "—") : "General enquiry"} · {sourceLabel(l.source)}</span>
+                  <span className="mt-1 block text-xs text-ink-soft">{formatDateTimeIst(l.created_at)}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-x-auto rounded-2xl md:block border border-sand bg-white-warm">
             <table className="w-full min-w-[760px] text-left text-sm">
               <caption className="sr-only">Leads</caption>
               <thead className="border-b border-sand bg-parchment text-xs uppercase tracking-wide text-ink-soft">
