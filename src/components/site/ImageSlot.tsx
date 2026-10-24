@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SlotImage } from "@/components/site/SlotImage";
 import { Mandala } from "@/components/art/Mandala";
 import { cn } from "@/lib/utils";
 
@@ -27,17 +27,15 @@ export function ImageSlot({
   if (src) {
     const local = /\/\/(localhost|127\.0\.0\.1)/.test(src);
     return (
-      <div className={cn("ornate-frame relative overflow-hidden", radius, className)}>
-        <Image
-          src={src}
-          alt={alt ?? ""}
-          fill
-          sizes={sizes}
-          priority={priority}
-          unoptimized={local}
-          className="object-cover"
-        />
-      </div>
+      <SlotImage
+        src={src}
+        alt={alt ?? ""}
+        sizes={sizes}
+        priority={priority}
+        unoptimized={local}
+        frameClassName={cn("ornate-frame relative overflow-hidden", radius, className)}
+        placeholderClassName={cn("ornate-frame relative flex items-center justify-center overflow-hidden bg-parchment", radius, className)}
+      />
     );
   }
   return (

@@ -218,10 +218,11 @@ function toService(r: Record<string, unknown>): Service {
   const rawPrice = r.price_cents ?? r.price_paise;
   const description = String(r.description ?? "");
   const title = String(r.title);
+  const slug = typeof r.slug === "string" && r.slug ? r.slug : slugify(title);
   const isActive = "is_active" in r ? r.is_active === true : r.status === "published";
   return {
     id: String(r.id),
-    slug: typeof r.slug === "string" && r.slug ? r.slug : slugify(title),
+    slug,
     title,
     short_description: String(r.short_description ?? "") || (description.length > 160 ? `${description.slice(0, 157).trimEnd()}…` : description),
     description,
@@ -231,7 +232,8 @@ function toService(r: Record<string, unknown>): Service {
     features: Array.isArray(r.features) ? (r.features as string[]) : [],
     deliverables: Array.isArray(r.deliverables) ? (r.deliverables as string[]) : [],
     image_asset_id: (r.image_asset_id as string | null) ?? null,
-    imageUrl: mediaPublicUrl(m?.storage_path),
+    // Admin-chosen image wins; otherwise a file dropped in public/services/<slug>.jpg (falls back to the mandala if absent).
+    imageUrl: mediaPublicUrl(m?.storage_path) ?? `/services/${slug}.jpg`,
     imageAlt: m?.alt_text ?? "",
     status: isActive ? "published" : "draft",
     is_featured: Boolean(r.is_featured),
