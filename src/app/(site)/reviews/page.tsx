@@ -4,7 +4,8 @@ import { Backdrop } from "@/components/site/Backdrop";
 import { Testimonials } from "@/components/site/HomeSections";
 import { ButtonLink, Container } from "@/components/ui";
 import { getBookingMode } from "@/lib/booking/config";
-import { getPageContent, getTestimonials, sectionByKey } from "@/lib/data";
+import { getPageContent, getSettings, getTestimonials, sectionByKey } from "@/lib/data";
+import { safeHref } from "@/lib/utils";
 
 // Re-read the database at most once a minute so admin edits show up without a redeploy.
 export const revalidate = 60;
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ReviewsPage() {
-  const [page, items] = await Promise.all([getPageContent("home"), getTestimonials()]);
+  const [page, items, settings] = await Promise.all([getPageContent("home"), getTestimonials(), getSettings()]);
   if (page.notFound) notFound();
   const testi = sectionByKey(page.sections, "testimonials");
   const bookable = getBookingMode().enabled;
@@ -29,6 +30,22 @@ export default async function ReviewsPage() {
           <Container narrow>
             <h1 className="text-4xl text-maroon">Client reviews</h1>
             <p className="mt-4 text-lg text-ink-soft">Verified reviews will appear here soon.</p>
+          </Container>
+        </section>
+      )}
+      {settings.astrosage_url && (
+        <section className="pb-6 text-center">
+          <Container narrow>
+            <p className="text-ink-soft">Neelabh Shivam is also listed on AstroSage, where clients leave public ratings.</p>
+            <a
+              href={safeHref(settings.astrosage_url)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex min-h-12 items-center justify-center rounded-full border border-gold bg-white-warm px-7 font-semibold text-maroon hover:bg-parchment"
+            >
+              Read reviews on AstroSage
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
           </Container>
         </section>
       )}
