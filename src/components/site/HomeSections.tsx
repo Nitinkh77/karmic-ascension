@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CalendarCheck, Compass, MessageCircle, Sparkles, Star, type LucideIcon } from "lucide-react";
-import { ArrowRight, HelpCircle, Route as RouteIcon, MessageSquareQuote } from "lucide-react";
+import { ArrowRight, HelpCircle, MessageSquareQuote, Route as RouteIcon, UserRound, Phone as PhoneIcon } from "lucide-react";
 import { Mandala } from "@/components/art/Mandala";
 import { OrnamentDivider } from "@/components/art/Ornaments";
 import { ZodiacWheel } from "@/components/art/ZodiacWheel";
@@ -323,9 +323,12 @@ export function FinalCta({ s, settings, bookable }: { s: Section; settings: Site
 }
 
 const EXPLORE: Array<{ href: string; title: string; text: string; Icon: LucideIcon }> = [
+  { href: "/services", title: "Consultations", text: "Choose the reading that fits your question, with prices and durations.", Icon: Sparkles },
   { href: "/how-it-works", title: "How it works", text: "What to expect, step by step, from booking to your reading.", Icon: RouteIcon },
   { href: "/reviews", title: "Client reviews", text: "Verified words from people who have consulted.", Icon: MessageSquareQuote },
+  { href: "/about", title: "About Neelabh Shivam", text: "Who you will be speaking with, and his approach.", Icon: UserRound },
   { href: "/faq", title: "Questions answered", text: "Birth details, timing, payment and rescheduling.", Icon: HelpCircle },
+  { href: "/contact", title: "Contact", text: "Ask a question first, or reach us on WhatsApp.", Icon: PhoneIcon },
 ];
 
 /** Gateway cards from the (now shorter) home page to the dedicated pages. */
@@ -333,8 +336,8 @@ export function ExploreTiles() {
   return (
     <section className="cv-auto py-14 sm:py-20">
       <Container>
-        <SectionHeading eyebrow="Explore" title="Everything you need, one step at a time" />
-        <ul className="mt-12 grid gap-6 md:grid-cols-3">
+        <SectionHeading eyebrow="Explore" title="Where would you like to begin?" />
+        <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {EXPLORE.map(({ href, title, text, Icon }, i) => (
             <li key={href}>
               <Reveal delay={i * 0.06} className="h-full">
