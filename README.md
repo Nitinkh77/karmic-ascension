@@ -54,6 +54,7 @@ In the Supabase dashboard open **SQL Editor → New query**, then paste and run 
 5. `supabase/migrations/20261023000005_grants.sql` – explicit least-privilege table grants. **Required**: without it every query fails with `42501 permission denied for table …`
 6. `supabase/migrations/20261024000006_leads.sql` – lead generation: `leads` table (admin-only RLS) and the `create_lead()` function used by the website forms
 7. `supabase/seed.sql` – settings, pages, the services named on the existing site, FAQs, weekly hours (seed is safe to re-run)
+8. `supabase/services_import.sql` – the 9 consultations from the existing website, with their real prices and durations (descriptions flagged for review)
 
 (Alternative with the CLI: `supabase link --project-ref <ref>` then `supabase db push`, then run `seed.sql` in the SQL Editor.)
 
@@ -135,3 +136,11 @@ Import the repo, add the same environment variables (set `NEXT_PUBLIC_SITE_URL` 
 | Zod schemas and utilities: 65+ assertions incl. hostile input | Cross-browser testing |
 | App code type-checked with `tsc` (strict null checks) against my own modules, third-party packages stubbed | |
 | Public home & booking page rendered to HTML with the real stylesheet and screenshotted at 1280 px and 390 px: no horizontal overflow | |
+
+## Site structure & motion
+
+Pages: Home, Services (+ detail), Process (`/how-it-works`), Reviews (`/reviews`), About, FAQ (`/faq`), Contact, Book.
+Process, Reviews and FAQ read their text from the **Home** page sections in Admin → Website content (keys `process`, `why`, `testimonials`, `faqs`).
+
+Smooth scroll uses the `lenis` package (`npm install` after pulling). Animations respect the visitor's reduced-motion setting.
+Public pages refresh from the database every 60 seconds.

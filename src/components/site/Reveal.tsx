@@ -1,9 +1,9 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 
-/** Subtle fade-and-rise on scroll. Does nothing for users who prefer reduced motion. */
+/** Spring fade-and-rise on scroll. Renders plain content for users who prefer reduced motion. */
 export function Reveal({
   children,
   delay = 0,
@@ -16,14 +16,14 @@ export function Reveal({
   const reduce = useReducedMotion();
   if (reduce) return <div className={className}>{children}</div>;
   return (
-    <motion.div
+    <m.div
       className={className}
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.5, delay, ease: "easeOut" }}
+      transition={{ type: "spring", stiffness: 110, damping: 18, mass: 0.9, delay }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }

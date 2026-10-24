@@ -35,7 +35,7 @@ export function MobileNav({ links }: { links: Array<{ href: string; label: strin
   }, [open]);
 
   return (
-    <div className="shrink-0 md:hidden">
+    <div className="shrink-0 xl:hidden">
       <button
         ref={toggleRef}
         type="button"
@@ -51,7 +51,7 @@ export function MobileNav({ links }: { links: Array<{ href: string; label: strin
       {open && (
         <div
           id="mobile-menu"
-          className="absolute inset-x-0 top-full z-40 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain border-b border-gold-soft bg-ivory px-5 pb-6 pt-3 shadow-lift"
+          className="panel-in absolute inset-x-0 top-full z-40 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain border-b border-gold-soft bg-ivory px-5 pb-6 pt-3 shadow-lift"
         >
           <nav aria-label="Mobile">
             <ul className="flex flex-col">
@@ -60,7 +60,7 @@ export function MobileNav({ links }: { links: Array<{ href: string; label: strin
                   <Link
                     href={l.href}
                     aria-current={pathname === l.href ? "page" : undefined}
-                    className="flex min-h-12 items-center border-b border-sand/70 font-serif text-xl text-maroon aria-[current=page]:text-saffron-deep"
+                    className="flex min-h-12 items-center border-b border-sand/70 font-serif text-xl text-maroon transition-transform active:translate-x-1 aria-[current=page]:text-saffron-deep"
                   >
                     {l.label}
                   </Link>

@@ -13,6 +13,10 @@ try {
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
+    // Modern formats are served automatically: large JPG uploads are re-encoded to AVIF/WebP and resized per device.
+    formats: ["image/avif", "image/webp"],
+    // Optimised copies are cached for a day, so repeat visits and other visitors get them instantly.
+    minimumCacheTTL: 86400,
     remotePatterns: supabaseHost
       ? [{ hostname: supabaseHost, pathname: "/storage/v1/object/public/**" }]
       : [],

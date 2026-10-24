@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Check, Clock, MessageCircle } from "lucide-react";
 import { ImageSlot } from "@/components/site/ImageSlot";
 import { FaqList } from "@/components/site/FaqList";
-import { LeadForm } from "@/components/site/LeadForm";
 import { PriceTag } from "@/components/site/ServiceCard";
 import { ButtonLink, Container, RichText } from "@/components/ui";
 import { getBookingMode } from "@/lib/booking/config";
@@ -13,6 +13,9 @@ import { formatDuration, whatsappLink } from "@/lib/utils";
 
 // Re-read the database at most once a minute so admin edits show up without a redeploy.
 export const revalidate = 60;
+
+// Below the fold: loaded as its own chunk so it never delays the first paint.
+const LeadForm = dynamic(() => import("@/components/site/LeadForm").then((m) => m.LeadForm));
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -145,7 +148,7 @@ export default async function ServiceDetailPage({ params }: Props) {
         </div>
 
         {faqs.length > 0 && (
-          <section className="mt-16" aria-labelledby="svc-faq-h">
+          <section className="cv-auto mt-16" aria-labelledby="svc-faq-h">
             <h2 id="svc-faq-h" className="mb-6 text-center text-3xl text-maroon">
               Questions about this consultation
             </h2>
@@ -153,7 +156,7 @@ export default async function ServiceDetailPage({ params }: Props) {
           </section>
         )}
 
-        <div className="mx-auto mt-16 max-w-2xl">
+        <div className="cv-auto mx-auto mt-16 max-w-2xl">
           <LeadForm
             source={`service:${service.slug}`}
             serviceId={service.isDefault ? null : service.id}

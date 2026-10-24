@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { CalendarCheck, Compass, MessageCircle, Sparkles, Star, type LucideIcon } from "lucide-react";
+import { ArrowRight, HelpCircle, Route as RouteIcon, MessageSquareQuote } from "lucide-react";
 import { Mandala } from "@/components/art/Mandala";
 import { OrnamentDivider } from "@/components/art/Ornaments";
 import { ZodiacWheel } from "@/components/art/ZodiacWheel";
+import { Backdrop } from "@/components/site/Backdrop";
 import { FaqList } from "@/components/site/FaqList";
 import { ImageSlot } from "@/components/site/ImageSlot";
 import { Reveal } from "@/components/site/Reveal";
@@ -22,7 +24,8 @@ export interface HomeData {
 
 export function Hero({ s, settings, bookable }: { s: Section; settings: SiteSettings; bookable: boolean }) {
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative isolate overflow-hidden">
+      <Backdrop />
       <Container className="grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-12 lg:gap-8 lg:py-20">
         <div className="lg:col-span-7">
           <p className="deva mb-4 text-xl text-gold-deep" lang="sa">
@@ -86,7 +89,7 @@ export function Intro({ s }: { s: Section }) {
 
 export function ServicesSection({ s, data }: { s: Section; data: HomeData }) {
   return (
-    <section className="py-14 sm:py-20">
+    <section className="cv-auto py-14 sm:py-20">
       <Container>
         <SectionHeading eyebrow={s.eyebrow} title={s.heading} description={s.body} />
         {data.services.length === 0 ? (
@@ -116,7 +119,7 @@ export function ServicesSection({ s, data }: { s: Section; data: HomeData }) {
 
 export function Prayer({ s }: { s: Section }) {
   return (
-    <section className="border-y border-gold-soft bg-parchment py-14 sm:py-20">
+    <section className="cv-auto border-y border-gold-soft bg-parchment py-14 sm:py-20">
       <Container narrow>
         <Reveal className="text-center">
           <p className="eyebrow mb-3">{s.eyebrow}</p>
@@ -142,12 +145,12 @@ export function Prayer({ s }: { s: Section }) {
 
 const WHY_ICONS: LucideIcon[] = [Compass, Sparkles, CalendarCheck];
 
-export function Why({ s }: { s: Section }) {
+export function Why({ s, asH1 = false }: { s: Section; asH1?: boolean }) {
   if (s.items.length === 0) return null;
   return (
     <section className="py-14 sm:py-20">
       <Container>
-        <SectionHeading eyebrow={s.eyebrow} title={s.heading} description={s.body} />
+        <SectionHeading as={asH1 ? "h1" : "h2"} eyebrow={s.eyebrow} title={s.heading} description={s.body} />
         <div className="mt-12 grid gap-6 md:grid-cols-3">
           {s.items.map((it, i) => {
             const Icon = WHY_ICONS[i % WHY_ICONS.length];
@@ -169,12 +172,12 @@ export function Why({ s }: { s: Section }) {
   );
 }
 
-export function Process({ s }: { s: Section }) {
+export function Process({ s, asH1 = false }: { s: Section; asH1?: boolean }) {
   if (s.items.length === 0) return null;
   return (
     <section className="bg-white-warm py-14 sm:py-20">
       <Container>
-        <SectionHeading eyebrow={s.eyebrow} title={s.heading} description={s.body} />
+        <SectionHeading as={asH1 ? "h1" : "h2"} eyebrow={s.eyebrow} title={s.heading} description={s.body} />
         <ol className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {s.items.map((it, i) => (
             <li key={it.title} className="relative">
@@ -199,7 +202,7 @@ export function Process({ s }: { s: Section }) {
 
 export function AboutTeaser({ s }: { s: Section }) {
   return (
-    <section className="py-14 sm:py-20">
+    <section className="cv-auto py-14 sm:py-20">
       <Container className="grid items-center gap-10 md:grid-cols-12">
         <div className="md:col-span-5">
           <ImageSlot
@@ -225,13 +228,13 @@ export function AboutTeaser({ s }: { s: Section }) {
   );
 }
 
-export function Testimonials({ s, items }: { s: Section; items: Testimonial[] }) {
+export function Testimonials({ s, items, asH1 = false }: { s: Section; items: Testimonial[]; asH1?: boolean }) {
   // Only verified + published testimonials ever reach this component.
   if (items.length === 0) return null;
   return (
     <section className="bg-white-warm py-14 sm:py-20">
       <Container>
-        <SectionHeading eyebrow={s.eyebrow} title={s.heading} description={s.body} />
+        <SectionHeading as={asH1 ? "h1" : "h2"} eyebrow={s.eyebrow} title={s.heading} description={s.body} />
         <ul className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {items.map((t) => (
             <li key={t.id} className="ornate-frame rounded-2xl p-7">
@@ -255,12 +258,12 @@ export function Testimonials({ s, items }: { s: Section; items: Testimonial[] })
   );
 }
 
-export function Faqs({ s, faqs }: { s: Section; faqs: Faq[] }) {
+export function Faqs({ s, faqs, asH1 = false }: { s: Section; faqs: Faq[]; asH1?: boolean }) {
   if (faqs.length === 0) return null;
   return (
     <section className="py-14 sm:py-20">
       <Container>
-        <SectionHeading eyebrow={s.eyebrow} title={s.heading} description={s.body} />
+        <SectionHeading as={asH1 ? "h1" : "h2"} eyebrow={s.eyebrow} title={s.heading} description={s.body} />
         <div className="mt-10">
           <FaqList faqs={faqs} />
         </div>
@@ -272,7 +275,8 @@ export function Faqs({ s, faqs }: { s: Section; faqs: Faq[] }) {
 export function FinalCta({ s, settings, bookable }: { s: Section; settings: SiteSettings; bookable: boolean }) {
   const wa = whatsappLink(settings.whatsapp_number, "Namaste, I would like to ask about a consultation.");
   return (
-    <section className="py-14 sm:py-20">
+    <section className="cv-auto relative isolate overflow-hidden py-14 sm:py-20">
+      <Backdrop />
       <Container>
         <div className="ornate-frame grid items-center gap-8 rounded-3xl bg-parchment p-8 sm:p-12 md:grid-cols-12">
           <div className="md:col-span-8">
@@ -313,6 +317,41 @@ export function FinalCta({ s, settings, bookable }: { s: Section; settings: Site
             <Mandala className="mx-auto w-full max-w-[16rem] text-gold" />
           </div>
         </div>
+      </Container>
+    </section>
+  );
+}
+
+const EXPLORE: Array<{ href: string; title: string; text: string; Icon: LucideIcon }> = [
+  { href: "/how-it-works", title: "How it works", text: "What to expect, step by step, from booking to your reading.", Icon: RouteIcon },
+  { href: "/reviews", title: "Client reviews", text: "Verified words from people who have consulted.", Icon: MessageSquareQuote },
+  { href: "/faq", title: "Questions answered", text: "Birth details, timing, payment and rescheduling.", Icon: HelpCircle },
+];
+
+/** Gateway cards from the (now shorter) home page to the dedicated pages. */
+export function ExploreTiles() {
+  return (
+    <section className="cv-auto py-14 sm:py-20">
+      <Container>
+        <SectionHeading eyebrow="Explore" title="Everything you need, one step at a time" />
+        <ul className="mt-12 grid gap-6 md:grid-cols-3">
+          {EXPLORE.map(({ href, title, text, Icon }, i) => (
+            <li key={href}>
+              <Reveal delay={i * 0.06} className="h-full">
+                <Link href={href} className="spring ornate-frame group flex h-full flex-col rounded-2xl p-7">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-gold bg-parchment text-maroon">
+                    <Icon className="h-6 w-6" aria-hidden="true" />
+                  </span>
+                  <span className="mt-5 font-serif text-2xl font-semibold text-maroon">{title}</span>
+                  <span className="mt-2 flex-1 text-ink-soft">{text}</span>
+                  <span className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-maroon">
+                    Read more <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                  </span>
+                </Link>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
       </Container>
     </section>
   );

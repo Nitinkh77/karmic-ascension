@@ -23,7 +23,7 @@ type Size = "md" | "lg" | "sm";
 
 export function buttonStyles(variant: Variant = "primary", size: Size = "md", className?: string) {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-colors",
+    "spring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold",
     "disabled:cursor-not-allowed disabled:opacity-60",
     size === "lg" && "min-h-12 px-7 text-base",
     size === "md" && "min-h-11 px-5 text-sm",

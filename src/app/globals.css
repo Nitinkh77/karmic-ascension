@@ -33,6 +33,9 @@
   --color-danger: #a12626;
 
   --shadow-card: 0 1px 2px rgb(107 29 42 / 0.05), 0 10px 28px -14px rgb(107 29 42 / 0.2);
+  /* Spring-like easing (overshoots then settles). Pure CSS, no JS; plain ease for reduced motion. */
+  --ease-spring: linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%, 0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1);
+
   --shadow-lift: 0 2px 4px rgb(107 29 42 / 0.06), 0 18px 36px -16px rgb(107 29 42 / 0.28);
 }
 
@@ -77,6 +80,17 @@
     outline: 3px solid var(--color-saffron);
     outline-offset: 2px;
     border-radius: 4px;
+  }
+  /* Lenis smooth scroll needs native smooth scrolling off while it is active */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
   }
   /* Respect users who prefer less motion */
   @media (prefers-reduced-motion: reduce) {
@@ -171,4 +185,111 @@
 .spin-slow {
   animation: slow-spin 180s linear infinite;
   transform-origin: center;
+}
+
+/* ───────────── Motion & performance helpers ───────────── */
+
+/* Skip rendering work for sections far below the fold until they are near the viewport. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 640px;
+}
+
+/* Spring press/hover for buttons and cards */
+.spring {
+  transition-property: transform, box-shadow, background-color, color, border-color;
+  transition-duration: 0.45s;
+  transition-timing-function: var(--ease-spring);
+}
+@media (hover: hover) {
+  .spring:hover {
+    transform: translateY(-2px);
+  }
+}
+.spring:active {
+  transform: scale(0.96);
+  transition-duration: 0.12s;
+}
+
+/* Menu / panel entrance */
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.panel-in {
+  animation: panel-in 0.45s var(--ease-spring) both;
+  transform-origin: top center;
+}
+
+/* Morphing background shapes (cheap: no blur filters, only border-radius + translate) */
+@keyframes morph {
+  0%,
+  100% {
+    border-radius: 60% 40% 55% 45% / 55% 45% 60% 40%;
+  }
+  50% {
+    border-radius: 42% 58% 40% 60% / 48% 62% 38% 52%;
+  }
+}
+@keyframes drift {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 2.5% -4%;
+  }
+}
+.bubble {
+  position: absolute;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-gold) 22%, transparent),
+    color-mix(in srgb, var(--color-saffron) 12%, transparent)
+  );
+  animation:
+    morph 16s ease-in-out infinite,
+    drift 22s ease-in-out infinite;
+}
+.bubble-ring {
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--color-gold) 35%, transparent);
+}
+
+/* Parallax with CSS scroll-driven animation (no JS). Browsers without support just show it static. */
+@keyframes parallax-y {
+  from {
+    translate: 0 -48px;
+  }
+  to {
+    translate: 0 48px;
+  }
+}
+@supports (animation-timeline: view()) {
+  .parallax {
+    animation: parallax-y linear both;
+    animation-timeline: view();
+    animation-range: cover;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble,
+  .parallax {
+    animation: none !important;
+  }
+  .spring,
+  .spring:hover,
+  .spring:active {
+    transform: none !important;
+  }
+  .panel-in {
+    animation: none;
+  }
 }
