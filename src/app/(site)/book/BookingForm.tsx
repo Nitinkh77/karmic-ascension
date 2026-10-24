@@ -47,6 +47,15 @@ interface Details {
   notes: string;
 }
 
+/** "2026-10-24" → ["Sat", "24 Oct"] (pure calendar date, so no time-zone shift). */
+function shortDate(iso: string): [string, string] {
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1));
+  const wd = new Intl.DateTimeFormat("en-IN", { weekday: "short", timeZone: "UTC" }).format(dt);
+  const rest = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", timeZone: "UTC" }).format(dt);
+  return [wd, rest];
+}
+
 const EMPTY: Details = { name: "", phone: "", email: "", birth_date: "", birth_time: "", birth_place: "", notes: "" };
 
 function Field({
@@ -416,17 +425,38 @@ export function BookingForm({
             <p className="mt-3 text-sm text-ink-soft">
               All times are Indian Standard Time (IST).{hoursText ? ` Consultations: ${hoursText}.` : ""}
             </p>
-            <div className="mt-4 max-w-sm">
-              <Field id="date" label="Choose a date" required>
-                <select id="date" className="field" value={date} onChange={(e) => setDate(e.target.value)}>
-                  <option value="">Select a date…</option>
-                  {dates.map((x) => (
-                    <option key={x} value={x}>
-                      {formatDateIst(x)}
-                    </option>
-                  ))}
-                </select>
-              </Field>
+            <div className="mt-5">
+              <p id="date-label" className="mb-2 text-sm font-semibold text-charcoal">
+                Choose a date <span className="text-danger" aria-hidden="true">*</span>
+              </p>
+              <div
+                role="radiogroup"
+                aria-labelledby="date-label"
+                className="grid max-h-72 grid-cols-2 gap-2 overflow-y-auto rounded-xl border border-sand bg-white-warm p-2 sm:grid-cols-3 md:grid-cols-4"
+              >
+                {dates.map((x) => {
+                  const on = x === date;
+                  const [wd, rest] = shortDate(x);
+                  return (
+                    <button
+                      key={x}
+                      type="button"
+                      role="radio"
+                      aria-checked={on}
+                      aria-label={formatDateIst(x)}
+                      onClick={() => setDate(x)}
+                      className={cn(
+                        "flex min-h-14 flex-col items-center justify-center rounded-xl border px-2 py-1.5 text-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon",
+                        on ? "border-maroon bg-maroon text-ivory" : "border-gold bg-white-warm text-maroon hover:bg-parchment",
+                      )}
+                    >
+                      <span className="text-xs font-medium uppercase tracking-wide opacity-80">{wd}</span>
+                      <span className="text-sm font-semibold">{rest}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {date && <p className="mt-2 text-sm text-ink-soft">Selected: {formatDateIst(date)}</p>}
             </div>
 
             {date && (
