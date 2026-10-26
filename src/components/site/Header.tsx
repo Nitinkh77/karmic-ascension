@@ -7,10 +7,10 @@ import { Container } from "@/components/ui";
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
-  { href: "/how-it-works", label: "Process" },
+  { href: "/horoscope", label: "Horoscope" },
+  { href: "/kundali", label: "Kundali" },
   { href: "/reviews", label: "Reviews" },
   { href: "/about", label: "About" },
-  { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
 ];
 

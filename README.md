@@ -144,3 +144,10 @@ Process, Reviews and FAQ read their text from the **Home** page sections in Admi
 
 Smooth scroll uses the `lenis` package (`npm install` after pulling). Animations respect the visitor's reduced-motion setting.
 Public pages refresh from the database every 60 seconds.
+
+## Horoscope, Kundali and service pages
+
+- `/horoscope`, `/horoscope/<rashi>`: daily Moon-sign guidance (Chandra Gochar) computed on the server with the open-source `astronomy-engine` (Lahiri ayanamsa). General guidance, not predictions.
+- `/kundali`: free birth chart (North Indian style) and Vimshottari dasha. Birth data is processed in memory and never stored. Place search uses a built-in list of Indian cities plus Open-Meteo geocoding (its free tier is non-commercial; use their paid plan for commercial traffic).
+- `/services/<slug>`: dedicated page per consultation. Edit text in Admin → Services; page copy defaults live in `src/lib/service-content.ts`.
+- After pulling: run `npm install` (adds `astronomy-engine`).
