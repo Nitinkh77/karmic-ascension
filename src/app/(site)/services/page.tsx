@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
-import { OrnamentDivider } from "@/components/art/Ornaments";
+import { PageHero } from "@/components/site/PageHero";
 import { ServicesGrid } from "@/components/site/ServiceCard";
-import { ButtonLink, Container, SectionHeading } from "@/components/ui";
+import { ButtonLink, Container } from "@/components/ui";
 import { getBookingMode } from "@/lib/booking/config";
 import { getPageContent, getServicesResult, sectionByKey } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
@@ -20,16 +20,10 @@ export default async function ServicesPage() {
   const bookable = getBookingMode().enabled;
 
   return (
-    <section className="py-14 sm:py-20">
+    <>
+      <PageHero eyebrow={intro?.eyebrow ?? undefined} title={intro?.heading ?? page.meta.title} description={intro?.body ?? undefined} />
+      <section className="py-14 sm:py-20">
       <Container>
-        <SectionHeading
-          as="h1"
-          eyebrow={intro?.eyebrow}
-          title={intro?.heading ?? page.meta.title}
-          description={intro?.body}
-        />
-        <OrnamentDivider className="my-10" />
-
         {error ? (
           <div role="alert" className="mx-auto max-w-lg rounded-2xl border border-danger/40 bg-red-50 p-8 text-center">
             <AlertTriangle className="mx-auto h-8 w-8 text-danger" aria-hidden="true" />
@@ -55,5 +49,6 @@ export default async function ServicesPage() {
         )}
       </Container>
     </section>
+    </>
   );
 }
