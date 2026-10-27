@@ -59,6 +59,15 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
+  /* All text can be selected and copied. Links do not start a drag, so you can select text that sits on a link. */
+  body {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  a,
+  img {
+    -webkit-user-drag: none;
+  }
   h1,
   h2,
   h3,

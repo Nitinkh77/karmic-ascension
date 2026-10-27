@@ -2,6 +2,7 @@ import { preconnect } from "react-dom";
 import { AnnouncementBar, SetupBanner } from "@/components/site/Banners";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
+import { RouteProgress } from "@/components/site/RouteProgress";
 import { MotionProvider } from "@/components/site/MotionProvider";
 import { SmoothScroll } from "@/components/site/SmoothScroll";
 import { supabaseUrl } from "@/lib/env";
@@ -16,6 +17,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   if (supabaseUrl && /^https:\/\//.test(supabaseUrl)) preconnect(new URL(supabaseUrl).origin, { crossOrigin: "anonymous" });
   return (
     <MotionProvider>
+      <RouteProgress />
       <SmoothScroll />
       <a
         href="#main"

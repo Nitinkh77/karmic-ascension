@@ -36,6 +36,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Karmic Ascension – Vedic Astrology™",
     locale: "en_IN",
+    images: [{ url: "/og-logo.png", width: 1200, height: 1200, alt: "Karmic Ascension – Vedic Astrology" }],
   },
   twitter: { card: "summary_large_image" },
 };

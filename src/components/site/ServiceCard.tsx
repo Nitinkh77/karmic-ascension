@@ -18,15 +18,17 @@ export function PriceTag({ service }: { service: Pick<Service, "price_paise" | "
 export function ServiceCard({ service, bookable }: { service: Service; bookable: boolean }) {
   return (
     <article className="ornate-frame group flex h-full flex-col overflow-hidden rounded-2xl transition-shadow hover:shadow-lift">
-      <ImageSlot
-        src={service.imageUrl}
-        alt={service.imageAlt || service.title}
-        className="aspect-[16/10] w-full rounded-none border-0 shadow-none before:hidden"
-        sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
-      />
+      <Link href={`/services/${service.slug}`} tabIndex={-1} aria-hidden="true" className="block">
+        <ImageSlot
+          src={service.imageUrl}
+          alt={service.imageAlt || service.title}
+          className="aspect-[16/10] w-full rounded-none border-0 shadow-none before:hidden"
+          sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
+        />
+      </Link>
       <div className="flex flex-1 flex-col p-6">
         <h3 className="text-2xl text-maroon">
-          <Link href={`/services/${service.slug}`} className="after:absolute after:inset-0 hover:underline">
+          <Link href={`/services/${service.slug}`} className="hover:underline">
             {service.title}
           </Link>
         </h3>
@@ -39,17 +41,21 @@ export function ServiceCard({ service, bookable }: { service: Service; bookable:
               {formatDuration(service.duration_minutes)}
             </p>
           </div>
-          <span className="relative z-10 inline-flex items-center gap-1 text-sm font-semibold text-maroon">
-            Details <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-          </span>
+          <Link
+            href={`/services/${service.slug}`}
+            className="inline-flex items-center gap-1 text-sm font-semibold text-maroon hover:underline"
+          >
+            Details <span className="sr-only">about {service.title}</span>
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          </Link>
         </div>
         {/* The booking link carries the service slug; /book pre-selects that service. */}
         {bookable ? (
-          <ButtonLink href={`/book?service=${encodeURIComponent(service.slug)}`} size="md" className="relative z-10 mt-4 w-full">
+          <ButtonLink href={`/book?service=${encodeURIComponent(service.slug)}`} size="md" className="mt-4 w-full">
             Book This Service
           </ButtonLink>
         ) : (
-          <ButtonLink href="/contact" variant="secondary" size="md" className="relative z-10 mt-4 w-full">
+          <ButtonLink href="/contact" variant="secondary" size="md" className="mt-4 w-full">
             Contact to book
           </ButtonLink>
         )}

@@ -55,19 +55,19 @@ export function ScallopBand({ className }: { className?: string }) {
   );
 }
 
-/** Brand emblem (also used as favicon source). */
+/** Brand logo (the client's Karmic Ascension mark). Decorative: the brand name is always written next to it. */
 export function Emblem({ className }: { className?: string }) {
   return (
-    <svg viewBox="-50 -50 100 100" className={cn("h-10 w-10", className)} aria-hidden="true">
-      <circle r="48" fill="var(--color-maroon)" />
-      <circle r="44" fill="none" stroke="var(--color-gold-soft)" strokeWidth="1" />
-      <g stroke="var(--color-gold-soft)" strokeWidth="1.1" fill="none">
-        {Array.from({ length: 8 }, (_, i) => (
-          <path key={i} d="M0 -38 C 6 -30, 6 -22, 0 -15 C -6 -22, -6 -30, 0 -38 Z" transform={`rotate(${i * 45})`} />
-        ))}
-        <circle r="11" />
-        <path d="M0 -8 L2.4 -2.4 L8 0 L2.4 2.4 L0 8 L-2.4 2.4 L-8 0 L-2.4 -2.4 Z" fill="var(--color-gold-soft)" stroke="none" />
-      </g>
-    </svg>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/logo.png"
+      width={192}
+      height={192}
+      alt=""
+      aria-hidden="true"
+      decoding="async"
+      draggable={false}
+      className={cn("h-10 w-10 rounded-md object-cover", className)}
+    />
   );
 }
