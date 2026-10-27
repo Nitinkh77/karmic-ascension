@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
+  TrendingUp,
   CalendarClock,
   CalendarDays,
   FileText,
   HelpCircle,
+  History,
   Image as ImageIcon,
   LayoutDashboard,
   Menu,
@@ -23,10 +25,12 @@ import { cn } from "@/lib/utils";
 
 const ITEMS: Array<{ href: string; label: string; Icon: LucideIcon }> = [
   { href: "/admin", label: "Dashboard", Icon: LayoutDashboard },
+  { href: "/admin/analytics", label: "Analytics", Icon: TrendingUp },
   { href: "/admin/bookings", label: "Bookings", Icon: CalendarDays },
   { href: "/admin/leads", label: "Leads", Icon: Users },
   { href: "/admin/customers", label: "Customers", Icon: UserRound },
   { href: "/admin/services", label: "Services & pricing", Icon: Sparkles },
+  { href: "/admin/activity", label: "Activity log", Icon: History },
   { href: "/admin/availability", label: "Availability", Icon: CalendarClock },
   { href: "/admin/content", label: "Website content", Icon: FileText },
   { href: "/admin/media", label: "Media library", Icon: ImageIcon },

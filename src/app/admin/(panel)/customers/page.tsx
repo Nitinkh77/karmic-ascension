@@ -1,5 +1,6 @@
+import { Download } from "lucide-react";
 import { Empty, PageTitle } from "@/components/admin/ui";
-import { Badge } from "@/components/ui";
+import { Badge, buttonStyles } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth";
 import { formatDateTimeIst } from "@/lib/booking/slots";
 
@@ -18,7 +19,9 @@ export default async function CustomersPage() {
 
   return (
     <>
-      <PageTitle title="Customers" description="People who signed up on the website. Use the email to follow up." />
+      <PageTitle title="Customers" description="People who signed up on the website. Use the email to follow up.">
+        <a href="/admin/customers/export" className={buttonStyles("secondary", "md")}><Download className="h-4 w-4" aria-hidden="true" /> Export CSV</a>
+      </PageTitle>
       {error ? (
         <p role="alert" className="rounded-xl border border-danger/40 bg-red-50 p-4 text-danger">Could not load customers.</p>
       ) : rows.length === 0 ? (
