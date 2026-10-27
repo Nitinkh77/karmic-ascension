@@ -39,6 +39,16 @@ export const getCurrentAdmin = cache(async (): Promise<AdminContext | null> => {
   return { user, profile, supabase };
 });
 
+/** Any signed-in visitor (customer or admin). Local token check, cached per request. */
+export const getSignedInUser = cache(async (): Promise<{ id: string; email?: string } | null> => {
+  if (!isSupabaseConfigured) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getClaims();
+  const sub = data?.claims?.sub;
+  if (error || !sub) return null;
+  return { id: sub, email: typeof data?.claims?.email === "string" ? data.claims.email : undefined };
+});
+
 /** For admin pages/layouts: redirects away when not an admin. */
 export async function requireAdmin(): Promise<AdminContext> {
   const admin = await getCurrentAdmin();

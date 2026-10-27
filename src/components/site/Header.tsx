@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Emblem } from "@/components/art/Ornaments";
 import { DesktopNav } from "@/components/site/DesktopNav";
 import { MobileNav } from "@/components/site/MobileNav";
+import { AccountLink } from "@/components/site/AccountLink";
 import { Container } from "@/components/ui";
 
 export const NAV_LINKS = [
@@ -40,6 +41,7 @@ export function Header({ brandName }: { brandName: string }) {
 
         <DesktopNav links={NAV_LINKS} />
 
+        <div className="hidden xl:block"><AccountLink /></div>
         <MobileNav links={NAV_LINKS} />
       </Container>
     </header>

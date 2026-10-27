@@ -151,3 +151,13 @@ Public pages refresh from the database every 60 seconds.
 - `/kundali`: free birth chart (North Indian style) and Vimshottari dasha. Birth data is processed in memory and never stored. Place search uses a built-in list of Indian cities plus Open-Meteo geocoding (its free tier is non-commercial; use their paid plan for commercial traffic).
 - `/services/<slug>`: dedicated page per consultation. Edit text in Admin → Services; page copy defaults live in `src/lib/service-content.ts`.
 - After pulling: run `npm install` (adds `astronomy-engine`).
+
+## Customer sign-in (Google + email)
+
+Visitors can open Home, Login and the policy pages; everything else asks them to sign in first (`src/proxy.ts`, `PUBLIC_PATHS`).
+Customers are normal Supabase Auth users with `profiles.role = 'user'`; only an admin can promote anyone (see SQL in the README).
+
+Set up in the Supabase dashboard (no secrets go in the code):
+1. Authentication → URL Configuration: Site URL = your Vercel URL; add `https://<your-domain>/auth/callback` to Redirect URLs.
+2. Authentication → Providers → Google: enable, paste the Client ID and Client Secret from Google Cloud Console (OAuth client of type "Web application"). In Google Cloud, add Supabase's callback URL shown on that screen as an authorised redirect URI.
+3. Authentication → Providers → Email: keep "Confirm email" on so sign-ups verify their address.

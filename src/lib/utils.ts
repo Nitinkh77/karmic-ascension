@@ -81,3 +81,10 @@ export function parseLines(raw: string): string[] {
     .map((l) => l.trim())
     .filter(Boolean);
 }
+
+/** Same-site relative path only (blocks open redirects like //evil.com or https://…). */
+export function safeNext(next: string | null | undefined, fallback = "/services"): string {
+  const v = (next ?? "").trim();
+  if (v.startsWith("/") && !v.startsWith("//") && !v.includes("\\") && !v.startsWith("/login") && !v.startsWith("/auth")) return v;
+  return fallback;
+}

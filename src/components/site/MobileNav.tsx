@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { AccountLink } from "@/components/site/AccountLink";
 import { buttonStyles } from "@/components/ui";
 
 export function MobileNav({ links }: { links: Array<{ href: string; label: string }> }) {
@@ -67,6 +68,7 @@ export function MobileNav({ links }: { links: Array<{ href: string; label: strin
                 </li>
               ))}
             </ul>
+            <div className="mt-3"><AccountLink className="w-full justify-center border border-sand" /></div>
             <Link href="/book" className={buttonStyles("primary", "lg", "mt-5 w-full")}>
               Book a consultation
             </Link>
