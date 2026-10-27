@@ -29,9 +29,9 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Local token check (fast). Also refreshes the session cookie when the token is near expiry.
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const user = claimsData?.claims?.sub ? claimsData.claims : null;
 
   if (!user && pathname.startsWith("/admin") && pathname !== "/admin/login") {
     const login = request.nextUrl.clone();
