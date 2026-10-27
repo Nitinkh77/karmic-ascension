@@ -2,35 +2,29 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createBrowserSupabase } from "@/lib/supabase/browser";
-import { supabaseUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
-/** "Sign in" for visitors, "Sign out" once signed in. Reads the session cookie in the browser (no network call). */
+/** "Sign in" for visitors, "Sign out" once signed in. The server decides, so it always matches the real session. */
 export function AccountLink({ className }: { className?: string }) {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!supabaseUrl) return;
-    const sb = createBrowserSupabase();
-    sb.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-    const { data } = sb.auth.onAuthStateChange((_e, session) => setSignedIn(!!session));
-    return () => data.subscription.unsubscribe();
+    let alive = true;
+    fetch("/api/me", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { signedIn: false }))
+      .then((d: { signedIn?: boolean }) => alive && setSignedIn(!!d.signedIn))
+      .catch(() => alive && setSignedIn(false));
+    return () => {
+      alive = false;
+    };
   }, []);
 
   if (signedIn === null) return null;
   const base = "inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold text-maroon hover:bg-parchment";
   if (!signedIn) return <Link href="/login" className={cn(base, className)}>Sign in</Link>;
   return (
-    <button
-      type="button"
-      className={cn(base, className)}
-      onClick={async () => {
-        await createBrowserSupabase().auth.signOut();
-        window.location.assign("/login");
-      }}
-    >
-      Sign out
-    </button>
+    <form action="/auth/signout" method="post">
+      <button type="submit" className={cn(base, className)}>Sign out</button>
+    </form>
   );
 }
