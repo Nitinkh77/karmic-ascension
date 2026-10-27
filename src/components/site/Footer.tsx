@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Mail, MapPin, MessageCircle, Phone, Clock } from "lucide-react";
-import { Emblem } from "@/components/art/Ornaments";
+import { Emblem, ScallopBand } from "@/components/art/Ornaments";
 import { splitBrand } from "@/components/site/Header";
 import { Facebook, Instagram, Youtube } from "@/components/site/SocialIcons";
 import { Container } from "@/components/ui";
@@ -27,20 +27,21 @@ export function Footer({ settings }: { settings: SiteSettings }) {
     : `© ${year} ${settings.brand_name}`;
 
   return (
-    <footer className="night mt-24 border-t border-leaf/30">
-            <Container className="grid gap-10 py-14 md:grid-cols-12">
+    <footer className="mt-24 border-t border-gold-soft bg-parchment">
+      <ScallopBand className="-mt-px text-ivory" />
+      <Container className="grid gap-10 py-14 md:grid-cols-12">
         <div className="md:col-span-5">
           <div className="flex items-center gap-3">
             <Emblem className="h-12 w-12" />
             <div className="leading-tight">
-              <p className="font-serif text-2xl font-semibold text-leaf-soft">{line1}</p>
+              <p className="font-serif text-2xl font-semibold text-maroon">{line1}</p>
               {line2 && (
-                <p className="text-[0.7rem] font-semibold tracking-[0.2em] uppercase text-leaf">{line2}</p>
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-saffron-deep">{line2}</p>
               )}
             </div>
           </div>
-          <p className="mt-5 max-w-sm text-ivory/75">{settings.tagline}</p>
-          <p className="deva mt-5 text-lg text-leaf-soft" lang="sa">
+          <p className="mt-5 max-w-sm text-ink-soft">{settings.tagline}</p>
+          <p className="deva mt-5 text-lg text-maroon" lang="sa">
             {GANESH_INVOCATION}
           </p>
           {socials.length > 0 && (
@@ -52,7 +53,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`${label} (opens in a new tab)`}
-                    className="flex h-11 w-11 items-center justify-center rounded-full border border-leaf/50 text-leaf-soft transition-colors hover:bg-leaf hover:text-night"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-gold bg-white-warm text-maroon transition-colors hover:bg-maroon hover:text-ivory"
                   >
                     <Icon className="h-5 w-5" />
                   </a>
@@ -78,7 +79,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
               ["/contact", "Contact"],
             ].map(([href, label]) => (
               <li key={href}>
-                <Link href={href} className="text-ivory/90 hover:text-leaf hover:underline">
+                <Link href={href} className="text-charcoal hover:text-maroon hover:underline">
                   {label}
                 </Link>
               </li>
@@ -92,7 +93,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
               ["/cancellation-refund", "Cancellation & rescheduling"],
             ].map(([href, label]) => (
               <li key={href}>
-                <Link href={href} className="text-ivory/90 hover:text-leaf hover:underline">
+                <Link href={href} className="text-charcoal hover:text-maroon hover:underline">
                   {label}
                 </Link>
               </li>
@@ -102,48 +103,48 @@ export function Footer({ settings }: { settings: SiteSettings }) {
 
         <div className="md:col-span-4">
           <h2 className="eyebrow mb-4 font-sans">Contact</h2>
-          <ul className="space-y-3 text-ivory/90">
+          <ul className="space-y-3 text-charcoal">
             {settings.contact_phone && (
               <li className="flex items-start gap-3">
-                <Phone className="mt-1 h-4 w-4 shrink-0 text-leaf" aria-hidden="true" />
-                <a href={`tel:${settings.contact_phone.replace(/[^\d+]/g, "")}`} className="hover:text-leaf hover:underline">
+                <Phone className="mt-1 h-4 w-4 shrink-0 text-gold-deep" aria-hidden="true" />
+                <a href={`tel:${settings.contact_phone.replace(/[^\d+]/g, "")}`} className="hover:text-maroon hover:underline">
                   {settings.contact_phone}
                 </a>
               </li>
             )}
             {wa && (
               <li className="flex items-start gap-3">
-                <MessageCircle className="mt-1 h-4 w-4 shrink-0 text-leaf" aria-hidden="true" />
-                <a href={wa} target="_blank" rel="noopener noreferrer" className="hover:text-leaf hover:underline">
+                <MessageCircle className="mt-1 h-4 w-4 shrink-0 text-gold-deep" aria-hidden="true" />
+                <a href={wa} target="_blank" rel="noopener noreferrer" className="hover:text-maroon hover:underline">
                   WhatsApp
                 </a>
               </li>
             )}
             {settings.contact_email && (
               <li className="flex items-start gap-3">
-                <Mail className="mt-1 h-4 w-4 shrink-0 text-leaf" aria-hidden="true" />
-                <a href={`mailto:${settings.contact_email}`} className="break-all hover:text-leaf hover:underline">
+                <Mail className="mt-1 h-4 w-4 shrink-0 text-gold-deep" aria-hidden="true" />
+                <a href={`mailto:${settings.contact_email}`} className="break-all hover:text-maroon hover:underline">
                   {settings.contact_email}
                 </a>
               </li>
             )}
             {settings.address && (
               <li className="flex items-start gap-3">
-                <MapPin className="mt-1 h-4 w-4 shrink-0 text-leaf" aria-hidden="true" />
+                <MapPin className="mt-1 h-4 w-4 shrink-0 text-gold-deep" aria-hidden="true" />
                 <span>{settings.address}</span>
               </li>
             )}
             {settings.hours_text && (
               <li className="flex items-start gap-3">
-                <Clock className="mt-1 h-4 w-4 shrink-0 text-leaf" aria-hidden="true" />
+                <Clock className="mt-1 h-4 w-4 shrink-0 text-gold-deep" aria-hidden="true" />
                 <span>{settings.hours_text}</span>
               </li>
             )}
           </ul>
         </div>
       </Container>
-      <div className="border-t border-leaf/25">
-        <Container className="flex flex-col items-start justify-between gap-2 py-5 text-sm text-ivory/75 sm:flex-row sm:items-center">
+      <div className="border-t border-gold-soft">
+        <Container className="flex flex-col items-start justify-between gap-2 py-5 text-sm text-ink-soft sm:flex-row sm:items-center">
           <p>{copyright}</p>
           <p>Consultations are for guidance and reflection; no outcome is guaranteed.</p>
         </Container>

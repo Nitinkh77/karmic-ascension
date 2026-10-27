@@ -36,7 +36,7 @@ export function ZodiacWheel({ className }: { className?: string }) {
                 textAnchor="middle"
                 dominantBaseline="central"
                 fontSize="9"
-                fill="var(--wheel-glyph, var(--color-maroon))"
+                fill="var(--color-maroon)"
               >
                 {g + TEXT}
               </text>
@@ -47,14 +47,14 @@ export function ZodiacWheel({ className }: { className?: string }) {
           const a = ((i * 40 - 90) * Math.PI) / 180;
           return (
             <g key={g}>
-              <circle cx={52 * Math.cos(a)} cy={52 * Math.sin(a)} r="6.2" fill="var(--wheel-bg, var(--color-ivory))" stroke="var(--color-gold)" strokeWidth="0.6" />
+              <circle cx={52 * Math.cos(a)} cy={52 * Math.sin(a)} r="6.2" fill="var(--color-ivory)" stroke="var(--color-gold)" strokeWidth="0.6" />
               <text
                 x={52 * Math.cos(a)}
                 y={52 * Math.sin(a)}
                 textAnchor="middle"
                 dominantBaseline="central"
                 fontSize="7.5"
-                fill="var(--wheel-glyph, var(--color-saffron-deep))"
+                fill="var(--color-saffron-deep)"
               >
                 {g + TEXT}
               </text>

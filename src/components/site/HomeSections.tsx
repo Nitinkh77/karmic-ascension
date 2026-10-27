@@ -24,16 +24,16 @@ export interface HomeData {
 
 export function Hero({ s, settings, bookable }: { s: Section; settings: SiteSettings; bookable: boolean }) {
   return (
-    <section className="night relative isolate overflow-hidden">
+    <section className="relative isolate overflow-hidden">
       <Backdrop />
-      <Container className="grid items-center gap-10 py-16 sm:py-20 lg:grid-cols-12 lg:gap-8 lg:py-28">
+      <Container className="grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-12 lg:gap-8 lg:py-20">
         <div className="lg:col-span-7">
-          <p className="deva mb-5 text-xl text-leaf" lang="sa">
+          <p className="deva mb-4 text-xl text-gold-deep" lang="sa">
             {GANESH_INVOCATION}
           </p>
           {s.eyebrow && <p className="eyebrow mb-4">{s.eyebrow}</p>}
-          <h1 className="foil pb-1 text-5xl sm:text-6xl lg:text-7xl">{s.heading}</h1>
-          {s.body && <p className="mt-6 max-w-xl text-lg text-ivory/80 sm:text-xl">{s.body}</p>}
+          <h1 className="text-5xl text-maroon sm:text-6xl lg:text-[4.25rem]">{s.heading}</h1>
+          {s.body && <p className="mt-6 max-w-xl text-lg text-ink-soft sm:text-xl">{s.body}</p>}
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             {bookable ? (
               <ButtonLink href={safeHref(s.ctaHref, "/book")} size="lg">
@@ -44,13 +44,13 @@ export function Hero({ s, settings, bookable }: { s: Section; settings: SiteSett
                 Contact to book
               </ButtonLink>
             )}
-            <ButtonLink href="/services" variant="secondary" size="lg" className="!border-leaf/60 !text-leaf-soft hover:!bg-white/10">
+            <ButtonLink href="/services" variant="secondary" size="lg">
               Explore consultations
             </ButtonLink>
           </div>
           {settings.hours_text && (
-            <p className="mt-6 text-sm text-ivory/70">
-              Consultations: <span className="font-semibold text-ivory">{settings.hours_text}</span>
+            <p className="mt-6 text-sm text-ink-soft">
+              Consultations: <span className="font-semibold text-charcoal">{settings.hours_text}</span>
             </p>
           )}
         </div>
@@ -275,13 +275,13 @@ export function Faqs({ s, faqs, asH1 = false }: { s: Section; faqs: Faq[]; asH1?
 export function FinalCta({ s, settings, bookable }: { s: Section; settings: SiteSettings; bookable: boolean }) {
   const wa = whatsappLink(settings.whatsapp_number, "Namaste, I would like to ask about a consultation.");
   return (
-    <section className="night cv-auto relative isolate overflow-hidden py-20 sm:py-28">
+    <section className="cv-auto relative isolate overflow-hidden py-14 sm:py-20">
       <Backdrop />
       <Container>
-        <div className="grid items-center gap-8 border-y border-leaf/30 py-12 md:grid-cols-12">
+        <div className="ornate-frame grid items-center gap-8 rounded-3xl bg-parchment p-8 sm:p-12 md:grid-cols-12">
           <div className="md:col-span-8">
-            <h2 className="foil pb-1 text-4xl sm:text-5xl">{s.heading}</h2>
-            {s.body && <p className="mt-4 max-w-xl text-lg text-ivory/80">{s.body}</p>}
+            <h2 className="text-3xl text-maroon sm:text-4xl">{s.heading}</h2>
+            {s.body && <p className="mt-4 max-w-xl text-lg text-ink-soft">{s.body}</p>}
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               {bookable ? (
                 <ButtonLink href={safeHref(s.ctaHref, "/book")} size="lg">
@@ -297,7 +297,7 @@ export function FinalCta({ s, settings, bookable }: { s: Section; settings: Site
                   href={wa}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="spring inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-leaf/60 px-7 text-base font-semibold tracking-wide text-leaf-soft hover:bg-white/10"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-gold bg-white-warm px-7 text-base font-semibold text-maroon hover:bg-ivory"
                 >
                   <MessageCircle className="h-5 w-5" aria-hidden="true" />
                   WhatsApp
@@ -305,16 +305,16 @@ export function FinalCta({ s, settings, bookable }: { s: Section; settings: Site
                 </a>
               )}
             </div>
-            <p className="mt-5 text-sm text-ivory/70">
+            <p className="mt-5 text-sm text-ink-soft">
               Prefer to read first? See the{" "}
-              <Link href="/cancellation-refund" className="font-semibold text-leaf-soft underline underline-offset-2">
+              <Link href="/cancellation-refund" className="font-semibold text-maroon underline underline-offset-2">
                 rescheduling policy
               </Link>
               .
             </p>
           </div>
           <div className="hidden md:col-span-4 md:block">
-            <Mandala className="mx-auto w-full max-w-[16rem] text-leaf" />
+            <Mandala className="mx-auto w-full max-w-[16rem] text-gold" />
           </div>
         </div>
       </Container>

@@ -23,15 +23,15 @@ type Size = "md" | "lg" | "sm";
 
 export function buttonStyles(variant: Variant = "primary", size: Size = "md", className?: string) {
   return cn(
-    "spring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-semibold tracking-wide",
+    "spring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold",
     "disabled:cursor-not-allowed disabled:opacity-60",
     size === "lg" && "min-h-12 px-7 text-base",
     size === "md" && "min-h-11 px-5 text-sm",
     size === "sm" && "min-h-9 px-4 text-sm",
     variant === "primary" &&
-      "bg-maroon-deep text-leaf-soft shadow-card ring-1 ring-inset ring-leaf/60 hover:bg-leaf hover:text-night",
+      "bg-maroon text-ivory shadow-card hover:bg-maroon-deep",
     variant === "secondary" &&
-      "border border-gold bg-transparent text-maroon hover:bg-parchment",
+      "border border-gold bg-white-warm text-maroon hover:bg-parchment",
     variant === "ghost" && "text-maroon hover:bg-maroon-soft",
     variant === "danger" && "border border-danger bg-white-warm text-danger hover:bg-red-50",
     className,

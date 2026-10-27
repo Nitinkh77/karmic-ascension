@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Clock, Mail, MapPin, MessageCircle, Phone, type LucideIcon } from "lucide-react";
-import { PageHero } from "@/components/site/PageHero";
-import { Container, RichText } from "@/components/ui";
+import { Container, RichText, SectionHeading } from "@/components/ui";
 import { LeadForm } from "@/components/site/LeadForm";
 import { getPageContent, getSettings, sectionByKey } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
@@ -46,11 +45,10 @@ export default async function ContactPage() {
   if (s.hours_text) rows.push({ Icon: Clock, label: "Consultation hours (IST)", node: s.hours_text });
 
   return (
-    <>
-    <PageHero eyebrow={intro?.eyebrow ?? undefined} title={intro?.heading ?? "Contact"} description={intro?.body ?? undefined} />
     <section className="py-14 sm:py-20">
       <Container narrow>
-        <dl className="ornate-frame divide-y divide-sand rounded-2xl">
+        <SectionHeading as="h1" eyebrow={intro?.eyebrow} title={intro?.heading ?? "Contact"} description={intro?.body} />
+        <dl className="ornate-frame mt-12 divide-y divide-sand rounded-2xl">
           {rows.map(({ Icon, label, node }) => (
             <div key={label} className="flex items-start gap-4 p-6">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gold bg-parchment text-maroon">
@@ -72,6 +70,5 @@ export default async function ContactPage() {
         <RichText text={s.booking_policy_text} className="mt-10" />
       </Container>
     </section>
-    </>
   );
 }
