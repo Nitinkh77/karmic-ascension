@@ -99,7 +99,7 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
 export function AdminSidebar() {
   return (
     <nav aria-label="Admin" className="hidden w-64 shrink-0 bg-night p-4 lg:block">
-      <div className="sticky top-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+      <div className="sticky top-4 max-h-[calc(100vh-6rem)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <NavList />
       </div>
     </nav>
@@ -124,7 +124,7 @@ export function AdminMobileNav() {
         <nav
           id="admin-mobile-nav"
           aria-label="Admin"
-          className="absolute inset-x-0 top-full z-30 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-leaf/30 bg-night p-4 shadow-lift"
+          className="absolute inset-x-0 top-full z-30 max-h-[calc(100dvh-4rem)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden border-b border-leaf/30 bg-night p-4 shadow-lift"
         >
           <NavList onNavigate={() => setOpen(false)} />
         </nav>
