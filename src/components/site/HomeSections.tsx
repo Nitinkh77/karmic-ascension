@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarCheck, Compass, MessageCircle, Sparkles, Star, type LucideIcon } from "lucide-react";
+import { BadgeCheck, CalendarCheck, Compass, MessageCircle, Quote, Sparkles, Star, type LucideIcon } from "lucide-react";
 import { ArrowRight, Orbit, Sun, HelpCircle, MessageSquareQuote, Route as RouteIcon, UserRound, Phone as PhoneIcon } from "lucide-react";
 import { Mandala } from "@/components/art/Mandala";
 import { OrnamentDivider } from "@/components/art/Ornaments";
@@ -228,6 +228,42 @@ export function AboutTeaser({ s }: { s: Section }) {
   );
 }
 
+/** One review card: used on the home page and on /reviews. */
+export function ReviewCard({ t }: { t: Testimonial }) {
+  const initial = (t.author_name.trim()[0] ?? "•").toUpperCase();
+  const isGoogle = /google/i.test(t.source ?? "");
+  return (
+    <figure className="ornate-frame relative flex h-full flex-col rounded-2xl p-6 sm:p-7">
+      <Quote className="absolute right-5 top-5 h-8 w-8 text-gold/40" aria-hidden="true" />
+      {t.rating ? (
+        <p className="mb-3 flex gap-0.5 text-saffron" aria-label={`${t.rating} out of 5 stars`}>
+          {Array.from({ length: 5 }, (_, k) => (
+            <Star key={k} className={`h-4 w-4 ${k < (t.rating ?? 0) ? "fill-current" : "fill-transparent opacity-40"}`} aria-hidden="true" />
+          ))}
+        </p>
+      ) : null}
+      <blockquote className="flex-1 whitespace-pre-line font-serif text-lg leading-relaxed text-charcoal sm:text-xl">“{t.quote}”</blockquote>
+      <figcaption className="mt-5 flex items-center gap-3 border-t border-gold/30 pt-4">
+        <span
+          aria-hidden="true"
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-maroon to-saffron font-serif text-lg text-white"
+        >
+          {initial}
+        </span>
+        <span className="min-w-0 text-sm">
+          <span className="block truncate font-semibold text-maroon">{t.author_name}</span>
+          {t.author_detail && <span className="block truncate text-xs text-ink-soft">{t.author_detail}</span>}
+          {isGoogle && (
+            <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-ink-soft">
+              <BadgeCheck className="h-3.5 w-3.5 text-saffron" aria-hidden="true" /> Google review
+            </span>
+          )}
+        </span>
+      </figcaption>
+    </figure>
+  );
+}
+
 export function Testimonials({ s, items, asH1 = false }: { s: Section; items: Testimonial[]; asH1?: boolean }) {
   // Only verified + published testimonials ever reach this component.
   if (items.length === 0) return null;
@@ -235,21 +271,10 @@ export function Testimonials({ s, items, asH1 = false }: { s: Section; items: Te
     <section className="bg-white-warm py-14 sm:py-20">
       <Container>
         <SectionHeading as={asH1 ? "h1" : "h2"} eyebrow={s.eyebrow} title={s.heading} description={s.body} />
-        <ul className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-12 gap-6 md:columns-2 lg:columns-3">
           {items.map((t) => (
-            <li key={t.id} className="ornate-frame rounded-2xl p-7">
-              {t.rating && (
-                <p className="mb-3 flex gap-0.5 text-saffron" aria-label={`${t.rating} out of 5 stars`}>
-                  {Array.from({ length: t.rating }, (_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-current" aria-hidden="true" />
-                  ))}
-                </p>
-              )}
-              <blockquote className="whitespace-pre-line font-serif text-xl text-charcoal">“{t.quote}”</blockquote>
-              <p className="mt-4 text-sm font-semibold text-maroon">
-                {t.author_name}
-                {t.author_detail && <span className="font-normal text-ink-soft"> · {t.author_detail}</span>}
-              </p>
+            <li key={t.id} className="mb-6 break-inside-avoid">
+              <ReviewCard t={t} />
             </li>
           ))}
         </ul>
@@ -397,38 +422,24 @@ export function HomeGallery({ services }: { services: Service[] }) {
   );
 }
 
-/** Up to three verified reviews with a link to all of them. Renders nothing when there are none. */
+/** Up to six verified reviews with a link to all of them. Renders nothing when there are none. */
 export function HomeReviews({ items }: { items: Testimonial[] }) {
-  const top = items.slice(0, 3);
+  const top = items.slice(0, 6);
   if (top.length === 0) return null;
   return (
-    <section className="cv-auto bg-white-warm py-14 sm:py-20" aria-label="Client reviews">
+    <section className="cv-auto relative isolate overflow-hidden bg-white-warm py-14 sm:py-20" aria-label="Client reviews">
       <Container>
-        <SectionHeading eyebrow="Client reviews" title="What clients say" />
-        <ul className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <SectionHeading eyebrow="Client reviews" title="What clients say" description="Real words from people who have had a consultation, taken from Google reviews." />
+        <ul className="mt-10 gap-6 md:columns-2 lg:columns-3">
           {top.map((t, i) => (
-            <li key={t.id}>
-              <Reveal delay={i * 0.06} className="h-full">
-                <figure className="ornate-frame flex h-full flex-col rounded-2xl p-7">
-                  {t.rating && (
-                    <p className="mb-3 flex gap-0.5 text-saffron" aria-label={`${t.rating} out of 5 stars`}>
-                      {Array.from({ length: t.rating }, (_, k) => (
-                        <Star key={k} className="h-4 w-4 fill-current" aria-hidden="true" />
-                      ))}
-                    </p>
-                  )}
-                  <blockquote className="flex-1 whitespace-pre-line font-serif text-xl text-charcoal">“{t.quote}”</blockquote>
-                  <figcaption className="mt-4 text-sm">
-                    <span className="font-semibold text-maroon">{t.author_name}</span>
-                    {t.author_detail && <span className="text-ink-soft"> · {t.author_detail}</span>}
-                    {t.source && <span className="block text-xs text-ink-soft">{t.source}</span>}
-                  </figcaption>
-                </figure>
+            <li key={t.id} className="mb-6 break-inside-avoid">
+              <Reveal delay={(i % 3) * 0.06}>
+                <ReviewCard t={t} />
               </Reveal>
             </li>
           ))}
         </ul>
-        <div className="mt-10 text-center">
+        <div className="mt-6 text-center">
           <ButtonLink href="/reviews" variant="secondary">Read all reviews</ButtonLink>
         </div>
       </Container>
