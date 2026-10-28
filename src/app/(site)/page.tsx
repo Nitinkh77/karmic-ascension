@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ExploreTiles, Hero, Intro } from "@/components/site/HomeSections";
+import { ExploreTiles, HomeGallery, HomeReviews, Hero, Intro } from "@/components/site/HomeSections";
 import { getBookingMode } from "@/lib/booking/config";
 import {
   getFeaturedServices,
   getPageContent,
+  getServices,
   getSettings,
+  getTestimonials,
   sectionByKey,
 } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
@@ -16,10 +18,12 @@ export const revalidate = 60;
 export const generateMetadata = (): Promise<Metadata> => pageMetadata("home", "/");
 
 export default async function HomePage() {
-  const [page, settings, services] = await Promise.all([
+  const [page, settings, services, allServices, reviews] = await Promise.all([
     getPageContent("home"),
     getSettings(),
     getFeaturedServices(),
+    getServices(),
+    getTestimonials(),
   ]);
   if (page.notFound) notFound();
 
@@ -33,7 +37,9 @@ export default async function HomePage() {
     <>
       {hero && <Hero s={hero} settings={settings} bookable={bookable} />}
       {intro && <Intro s={intro} />}
+      <HomeGallery services={allServices} />
       <ExploreTiles />
+      <HomeReviews items={reviews} />
     </>
   );
 }

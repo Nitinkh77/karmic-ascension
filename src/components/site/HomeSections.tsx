@@ -361,3 +361,77 @@ export function ExploreTiles() {
     </section>
   );
 }
+
+/** Photo mosaic: the brand mark plus the consultation photos, each stamped with the logo. */
+export function HomeGallery({ services }: { services: Service[] }) {
+  const shots = services.filter((s) => s.imageUrl).slice(0, 4);
+  return (
+    <section className="cv-auto py-14 sm:py-20" aria-label="Photos from Karmic Ascension">
+      <Container>
+        <SectionHeading eyebrow="Our practice" title="Guidance rooted in Vedic tradition" />
+        <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:grid-rows-2">
+          <Reveal className="col-span-2 lg:row-span-2">
+            <div className="ornate-frame relative flex h-full min-h-64 flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl bg-parchment p-8 text-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-512.png" width={512} height={512} alt="Karmic Ascension – Vedic Astrology logo" loading="lazy" decoding="async" draggable={false} className="h-40 w-40 rounded-xl object-cover shadow-card sm:h-52 sm:w-52" />
+              <p className="font-serif text-2xl text-maroon sm:text-3xl">Resolve Pending Karma</p>
+              <p className="max-w-xs text-sm text-ink-soft">Vedic astrology consultations with Neelabh Shivam, Prayagraj.</p>
+            </div>
+          </Reveal>
+          {shots.map((s, i) => (
+            <Reveal key={s.id} delay={i * 0.06} className="h-full">
+              <Link href={`/services/${s.slug}`} className="spring group relative block aspect-square overflow-hidden rounded-2xl">
+                <ImageSlot src={s.imageUrl} alt={s.imageAlt || s.title} className="h-full w-full" sizes="(min-width: 1024px) 25vw, 50vw" />
+                <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-10 text-sm font-semibold text-white">
+                  {s.title}
+                </span>
+                {/* Logo stamp */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo.png" width={36} height={36} alt="" aria-hidden="true" loading="lazy" decoding="async" draggable={false} className="absolute right-2 top-2 h-9 w-9 rounded-md ring-2 ring-white/80" />
+              </Link>
+            </Reveal>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/** Up to three verified reviews with a link to all of them. Renders nothing when there are none. */
+export function HomeReviews({ items }: { items: Testimonial[] }) {
+  const top = items.slice(0, 3);
+  if (top.length === 0) return null;
+  return (
+    <section className="cv-auto bg-white-warm py-14 sm:py-20" aria-label="Client reviews">
+      <Container>
+        <SectionHeading eyebrow="Client reviews" title="What clients say" />
+        <ul className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {top.map((t, i) => (
+            <li key={t.id}>
+              <Reveal delay={i * 0.06} className="h-full">
+                <figure className="ornate-frame flex h-full flex-col rounded-2xl p-7">
+                  {t.rating && (
+                    <p className="mb-3 flex gap-0.5 text-saffron" aria-label={`${t.rating} out of 5 stars`}>
+                      {Array.from({ length: t.rating }, (_, k) => (
+                        <Star key={k} className="h-4 w-4 fill-current" aria-hidden="true" />
+                      ))}
+                    </p>
+                  )}
+                  <blockquote className="flex-1 whitespace-pre-line font-serif text-xl text-charcoal">“{t.quote}”</blockquote>
+                  <figcaption className="mt-4 text-sm">
+                    <span className="font-semibold text-maroon">{t.author_name}</span>
+                    {t.author_detail && <span className="text-ink-soft"> · {t.author_detail}</span>}
+                    {t.source && <span className="block text-xs text-ink-soft">{t.source}</span>}
+                  </figcaption>
+                </figure>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-10 text-center">
+          <ButtonLink href="/reviews" variant="secondary">Read all reviews</ButtonLink>
+        </div>
+      </Container>
+    </section>
+  );
+}
