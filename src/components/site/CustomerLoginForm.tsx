@@ -41,12 +41,12 @@ export function CustomerLoginForm({ next }: { next: string }) {
   }
 
   return (
-    <div className="mt-6">
+    <div className="mt-4">
       <button
         type="button"
         onClick={google}
         disabled={googleBusy}
-        className="spring inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-full border border-gold bg-white-warm px-6 font-semibold text-charcoal hover:bg-parchment disabled:opacity-60"
+        className="spring inline-flex min-h-11 w-full items-center justify-center gap-3 rounded-full border border-gold bg-white-warm px-6 text-sm font-semibold text-charcoal hover:bg-parchment disabled:opacity-60"
       >
         {googleBusy ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : <GoogleMark />}
         Continue with Google
@@ -57,11 +57,11 @@ export function CustomerLoginForm({ next }: { next: string }) {
         </p>
       )}
 
-      <div className="my-6 flex items-center gap-3 text-sm text-ink-soft" aria-hidden="true">
+      <div className="my-3 flex items-center gap-3 text-xs text-ink-soft" aria-hidden="true">
         <span className="h-px flex-1 bg-sand" /> or use email <span className="h-px flex-1 bg-sand" />
       </div>
 
-      <div role="tablist" aria-label="Sign in or create account" className="mb-5 grid grid-cols-2 rounded-full border border-sand bg-parchment p-1 text-sm font-semibold">
+      <div role="tablist" aria-label="Sign in or create account" className="mb-3 grid grid-cols-2 rounded-full border border-sand bg-parchment p-1 text-sm font-semibold">
         {(["in", "up"] as const).map((m) => (
           <button
             key={m}
@@ -69,14 +69,14 @@ export function CustomerLoginForm({ next }: { next: string }) {
             role="tab"
             aria-selected={mode === m}
             onClick={() => setMode(m)}
-            className={cn("min-h-10 rounded-full transition-colors", mode === m ? "bg-maroon text-ivory" : "text-charcoal")}
+            className={cn("min-h-9 rounded-full transition-colors", mode === m ? "bg-maroon text-ivory" : "text-charcoal")}
           >
             {m === "in" ? "Sign in" : "Create account"}
           </button>
         ))}
       </div>
 
-      <form key={mode} action={mode === "in" ? inAction : upAction} className="space-y-4" noValidate>
+      <form key={mode} action={mode === "in" ? inAction : upAction} className="space-y-3" noValidate>
         <input type="hidden" name="next" value={next} />
         {state?.message && (
           <p role={state.ok ? "status" : "alert"} className={cn("rounded-xl border p-3 text-sm", state.ok ? "border-success/40 bg-green-50 text-success" : "border-danger/40 bg-red-50 text-danger")}>
@@ -84,17 +84,17 @@ export function CustomerLoginForm({ next }: { next: string }) {
           </p>
         )}
         <div>
-          <label htmlFor="c-email" className="mb-1.5 block text-sm font-semibold">Email</label>
+          <label htmlFor="c-email" className="mb-1 block text-sm font-semibold">Email</label>
           <input id="c-email" name="email" type="email" autoComplete="email" required className="field" aria-invalid={!!state?.errors?.email} />
           {state?.errors?.email && <p className="mt-1 text-sm text-danger">{state.errors.email}</p>}
         </div>
         <div>
-          <label htmlFor="c-pass" className="mb-1.5 block text-sm font-semibold">Password</label>
+          <label htmlFor="c-pass" className="mb-1 block text-sm font-semibold">Password</label>
           <input id="c-pass" name="password" type="password" autoComplete={mode === "in" ? "current-password" : "new-password"} required minLength={mode === "up" ? 8 : undefined} className="field" aria-invalid={!!state?.errors?.password} />
           {state?.errors?.password && <p className="mt-1 text-sm text-danger">{state.errors.password}</p>}
           {mode === "up" && <p className="mt-1 text-xs text-ink-soft">At least 8 characters.</p>}
         </div>
-        <Button type="submit" size="lg" className="w-full" disabled={pending}>
+        <Button type="submit" size="md" className="w-full" disabled={pending}>
           {pending ? (<><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Please wait…</>) : mode === "in" ? "Sign in" : "Create account"}
         </Button>
       </form>
