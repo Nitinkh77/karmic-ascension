@@ -5,11 +5,28 @@ import { MobileNav } from "@/components/site/MobileNav";
 import { AccountLink } from "@/components/site/AccountLink";
 import { Container } from "@/components/ui";
 
-export const NAV_LINKS = [
+export interface NavChild {
+  href: string;
+  label: string;
+  description?: string;
+}
+export interface NavItem {
+  label: string;
+  href?: string;
+  children?: NavChild[];
+}
+
+export const NAV_LINKS: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
-  { href: "/horoscope", label: "Horoscope" },
-  { href: "/kundali", label: "Kundali" },
+  {
+    label: "Free Tools",
+    children: [
+      { href: "/horoscope", label: "Daily Horoscope", description: "Today's guidance for your Moon sign" },
+      { href: "/kundali", label: "Free Kundali", description: "Your birth chart, nakshatra and dasha" },
+      { href: "/kundli-matching", label: "Kundli Matching", description: "36-point Guna Milan for marriage" },
+    ],
+  },
   { href: "/reviews", label: "Reviews" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },

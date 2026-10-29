@@ -71,6 +71,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
               ["/services", "Astrology consultations"],
               ["/horoscope", "Daily horoscope"],
               ["/kundali", "Free Kundali"],
+              ["/kundli-matching", "Kundli matching"],
               ["/how-it-works", "How it works"],
               ["/reviews", "Client reviews"],
               ["/about", "About Neelabh Shivam"],
