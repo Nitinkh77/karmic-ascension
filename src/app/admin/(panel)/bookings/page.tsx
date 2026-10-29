@@ -3,7 +3,7 @@ import { Badge, buttonStyles } from "@/components/ui";
 import { Empty, PageTitle } from "@/components/admin/ui";
 import { BOOKING_COLUMNS, parseBookingFilters } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
-import { formatDateTimeIst, istToDate, addDays } from "@/lib/booking/slots";
+import { formatDateTimeIst, istToDate, addDays, istDateString } from "@/lib/booking/slots";
 import type { Booking } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 
@@ -22,6 +22,9 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
   if (f.service) q = q.eq("service_id", f.service);
   if (f.from) q = q.gte("starts_at", istToDate(f.from, "00:00").toISOString());
   if (f.to) q = q.lt("starts_at", istToDate(addDays(f.to, 1), "00:00").toISOString());
+  if (f.followup === "due") {
+    q = q.eq("follow_up_done", false).not("follow_up_on", "is", null).lte("follow_up_on", istDateString(new Date()));
+  }
   if (f.q) {
     // Strip characters that have meaning in PostgREST filter syntax before interpolating.
     const term = f.q.replace(/[%,()*\\]/g, " ").trim();
@@ -41,6 +44,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
       <form method="get" className="mb-6 grid gap-3 rounded-2xl border border-sand bg-white-warm p-4 sm:grid-cols-2 lg:grid-cols-6">
         <div className="lg:col-span-2">
           <label htmlFor="q" className="mb-1 block text-xs font-semibold">Search</label>
+          {f.followup && <input type="hidden" name="followup" value="due" />}
           <input id="q" name="q" defaultValue={f.q} placeholder="Name, email, phone, reference" className="field" />
         </div>
         <div>
@@ -75,6 +79,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
         <div className="flex items-end gap-2 lg:col-span-2">
           <button type="submit" className={buttonStyles("primary", "md")}>Apply filters</button>
           <Link href="/admin/bookings" className={buttonStyles("secondary", "md")}>Reset</Link>
+          <Link href="/admin/bookings?followup=due" className={buttonStyles("secondary", "md")}>Follow-ups due</Link>
         </div>
       </form>
 

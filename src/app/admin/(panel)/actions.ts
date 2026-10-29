@@ -11,6 +11,8 @@ import { parseItems, parseLines, rupeesToPaise, slugify } from "@/lib/utils";
 import {
   blockedDateSchema,
   bookingNotesSchema,
+  caseRecordSchema,
+  followUpSchema,
   bookingPaymentSchema,
   bookingRescheduleSchema,
   bookingStatusSchema,
@@ -22,6 +24,7 @@ import {
   sectionSchema,
   serviceSchema,
   settingsSchema,
+  testimonialPublishSchema,
   testimonialSchema,
   weeklyHoursSchema,
 } from "@/lib/validation";
@@ -36,7 +39,17 @@ export async function saveSettings(_p: ActionState, fd: FormData): Promise<Actio
     const r = parseWith(settingsSchema, formToObject(fd, ["announcement_active"]));
     if (!r.ok) return r.state;
     const { error } = await supabase.from("site_settings").update(r.data).eq("id", 1);
-    if (error) return fail(dbErrorMessage(error));
+    if (error) {
+      // The two newest settings need the latest migration. Until it is run, still save everything else.
+      if (error.code === "PGRST204" || error.code === "42703") {
+        const { notify_email: _n, google_review_url: _g, ...rest } = r.data;
+        const retry = await supabase.from("site_settings").update(rest).eq("id", 1);
+        if (retry.error) return fail(dbErrorMessage(retry.error));
+        refreshSite();
+        return ok("Settings saved, except the alert e-mail and Google review link. Run the latest database migration (20261029000009_crm_notifications.sql) to enable them.");
+      }
+      return fail(dbErrorMessage(error));
+    }
     refreshSite();
     return ok("Settings saved.");
   });
@@ -213,6 +226,20 @@ export async function deleteTestimonial(_p: ActionState, fd: FormData): Promise<
     refreshSite();
     revalidatePath("/admin/testimonials");
     return ok("Testimonial deleted.");
+  });
+}
+
+/** One-click show/hide from the list. Showing requires the testimonial to be verified (also enforced by the database). */
+export async function setTestimonialPublished(_p: ActionState, fd: FormData): Promise<ActionState> {
+  return adminAction(async ({ supabase }) => {
+    const r = parseWith(testimonialPublishSchema, formToObject(fd));
+    if (!r.ok) return r.state;
+    const publish = r.data.publish === "publish";
+    const { error } = await supabase.from("testimonials").update({ is_published: publish }).eq("id", r.data.id);
+    if (error) return fail(dbErrorMessage(error));
+    refreshSite();
+    revalidatePath("/admin/testimonials");
+    return ok(publish ? "Now shown on the website." : "Hidden from the website.");
   });
 }
 
@@ -429,6 +456,42 @@ export async function saveBookingNotes(_p: ActionState, fd: FormData): Promise<A
     if (error) return fail(dbErrorMessage(error));
     revalidatePath("/admin/bookings", "layout");
     return ok("Note saved.");
+  });
+}
+
+/** Private astrological record + remedies for a booking. Never visible to the customer. */
+export async function saveCaseRecord(_p: ActionState, fd: FormData): Promise<ActionState> {
+  return adminAction(async ({ supabase }) => {
+    const r = parseWith(caseRecordSchema, formToObject(fd));
+    if (!r.ok) return r.state;
+    const { id, ...row } = r.data;
+    const { error } = await supabase.from("bookings").update(row).eq("id", id);
+    if (error) return fail(dbErrorMessage(error));
+    revalidatePath("/admin/bookings", "layout");
+    return ok("Case record saved.");
+  });
+}
+
+export async function saveFollowUp(_p: ActionState, fd: FormData): Promise<ActionState> {
+  return adminAction(async ({ supabase }) => {
+    const r = parseWith(followUpSchema, formToObject(fd, ["follow_up_done"]));
+    if (!r.ok) return r.state;
+    const { id, ...row } = r.data;
+    const { error } = await supabase.from("bookings").update(row).eq("id", id);
+    if (error) return fail(dbErrorMessage(error));
+    revalidatePath("/admin", "layout");
+    return ok(row.follow_up_on ? (row.follow_up_done ? "Follow-up marked done." : "Follow-up reminder set.") : "Follow-up cleared.");
+  });
+}
+
+/** Records that a Google-review request was sent (called when the admin opens the WhatsApp message). */
+export async function markReviewRequested(id: string): Promise<void> {
+  await adminAction(async ({ supabase }) => {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return fail("Invalid booking.");
+    const { error } = await supabase.from("bookings").update({ review_requested_at: new Date().toISOString() }).eq("id", id);
+    if (error) return fail(dbErrorMessage(error));
+    revalidatePath("/admin/bookings", "layout");
+    return ok("Recorded.");
   });
 }
 

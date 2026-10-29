@@ -1,6 +1,7 @@
 import { AdminForm, Card, Check, Field, PageTitle } from "@/components/admin/ui";
 import { saveSettings } from "@/app/admin/(panel)/actions";
 import { requireAdmin } from "@/lib/auth";
+import { emailConfigured } from "@/lib/notify";
 import { isServiceRoleConfigured } from "@/lib/supabase/admin";
 import { DEFAULT_SETTINGS } from "@/lib/defaults";
 import type { SiteSettings } from "@/lib/types";
@@ -29,7 +30,8 @@ export default async function SettingsPage() {
           <li><strong>Supabase database &amp; auth:</strong> connected (you are signed in).</li>
           <li><strong>Public booking (server key):</strong> {isServiceRoleConfigured() ? "configured" : <span className="font-semibold text-danger">SUPABASE_SERVICE_ROLE_KEY missing — online booking is disabled</span>}</li>
           <li><strong>Online payments (Razorpay):</strong> not enabled — manual payment is used. A booking is paid only when you mark it so.</li>
-          <li><strong>E-mail / WhatsApp notifications:</strong> not integrated — new bookings appear in your dashboard.</li>
+          <li><strong>New-booking e-mail alerts:</strong> {emailConfigured() ? "on: you and the customer are e-mailed for every new booking." : <span>off. Add <code>RESEND_API_KEY</code> in Vercel to switch them on (see the README).</span>}</li>
+          <li><strong>WhatsApp:</strong> one-click message buttons are on each booking (WhatsApp opens with the text ready; you press Send).</li>
         </ul>
         <p className="mt-3 text-xs text-ink-soft">Time zone is fixed to Asia/Kolkata (IST).</p>
       </Card>
@@ -62,6 +64,18 @@ export default async function SettingsPage() {
             <Field label="Facebook URL" name="facebook_url"><input id="facebook_url" name="facebook_url" type="url" defaultValue={v(s.facebook_url)} className="field" /></Field>
             <Field label="YouTube URL" name="youtube_url"><input id="youtube_url" name="youtube_url" type="url" defaultValue={v(s.youtube_url)} className="field" /></Field>
             <Field label="AstroSage profile URL" name="astrosage_url" hint="The existing site links to an AstroSage profile; the URL was not available, so add it here."><input id="astrosage_url" name="astrosage_url" type="url" defaultValue={v(s.astrosage_url)} className="field" /></Field>
+          </div>
+        </Card>
+
+        <Card>
+          <h2 className="mb-4 text-xl text-maroon">Alerts &amp; reviews</h2>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field label="Alert e-mail (new bookings are sent here)" name="notify_email" hint="Leave empty to use the contact e-mail above.">
+              <input id="notify_email" name="notify_email" type="email" defaultValue={v(s.notify_email)} className="field" />
+            </Field>
+            <Field label="Google review link" name="google_review_url" hint="Google Business Profile → “Ask for reviews” → copy the link. Used by the review-request button on completed bookings.">
+              <input id="google_review_url" name="google_review_url" type="url" defaultValue={v(s.google_review_url)} className="field" placeholder="https://g.page/r/…/review" />
+            </Field>
           </div>
         </Card>
 

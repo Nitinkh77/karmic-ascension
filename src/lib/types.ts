@@ -28,6 +28,8 @@ export interface SiteSettings {
   seo_title: string | null;
   seo_description: string | null;
   og_image_asset_id: string | null;
+  google_review_url?: string | null;
+  notify_email?: string | null;
 }
 
 export interface SectionItem {
@@ -156,6 +158,19 @@ export interface Booking {
   payment_method: "manual" | "razorpay";
   admin_notes: string | null;
   created_at: string;
+  // Private case record (admin only). Present only on the booking detail query.
+  case_lagna?: string | null;
+  case_rashi?: string | null;
+  case_dasha?: string | null;
+  case_observations?: string | null;
+  case_pending_karma?: string | null;
+  remedy_gemstones?: string | null;
+  remedy_mantras?: string | null;
+  remedy_fasts?: string | null;
+  remedy_donations?: string | null;
+  follow_up_on?: string | null;
+  follow_up_done?: boolean;
+  review_requested_at?: string | null;
 }
 
 export type LeadStatus = "new" | "contacted" | "qualified" | "converted" | "lost";

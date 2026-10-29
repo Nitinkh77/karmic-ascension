@@ -161,3 +161,17 @@ Set up in the Supabase dashboard (no secrets go in the code):
 1. Authentication → URL Configuration: Site URL = your Vercel URL; add `https://<your-domain>/auth/callback` to Redirect URLs.
 2. Authentication → Providers → Google: enable, paste the Client ID and Client Secret from Google Cloud Console (OAuth client of type "Web application"). In Google Cloud, add Supabase's callback URL shown on that screen as an authorised redirect URI.
 3. Authentication → Providers → Email: keep "Confirm email" on so sign-ups verify their address.
+
+## Admin: client records, alerts and reviews
+
+Run `supabase/migrations/20261029000009_crm_notifications.sql` once (Supabase → SQL Editor). Safe to re-run.
+
+- **Clients (CRM):** `/admin/clients` groups everyone who booked by e-mail: bookings, completed sessions, lifetime value (bookings you marked paid), follow-ups due.
+- **Booking page:** private case record (Lagna, Rashi, running dasha, observations, pending karma), remedies (gemstones, mantras, fasts, donations), client history, follow-up reminder (30 / 90 days or any date). Customers can never see these; they are admin-only under RLS like the rest of `bookings`.
+- **WhatsApp buttons:** confirm, payment reminder, session reminder, follow-up and **Google review request**. WhatsApp opens with the message written; the admin presses Send. (Fully automatic WhatsApp needs the paid WhatsApp Business API and is not used.) Set the review link in Admin → Settings → Alerts & reviews.
+- **E-mail alerts on every new booking** (to the admin with all details, and a confirmation to the customer) via [Resend](https://resend.com):
+  1. Create a Resend account, verify your domain, create an API key.
+  2. In Vercel add `RESEND_API_KEY` and `NOTIFY_FROM_EMAIL` (e.g. `Karmic Ascension <bookings@neelabhshivam.com>`), then redeploy.
+  3. Set the alert address in Admin → Settings (falls back to the contact e-mail).
+  Without the key nothing is sent and bookings work as before. Resend's test sender `onboarding@resend.dev` can only deliver to the Resend account owner, so a verified domain is needed for customer e-mails.
+- **Testimonials, FAQs, page sections and media** are now collapsible lists: click a row to open and edit it; testimonials also have search, filters and a one-click Show/Hide.

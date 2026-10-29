@@ -34,4 +34,4 @@ select * from (values
    'I had a wonderful session with Neelabh sir. It was truly an enlightening experience. He has a profound knowledge of astrology. He is really good with decoding the past life karma and giving simple solutions to balance the karmic cycle. Would highly recommend!',
    5, 'Google Review', true, true, 70)
 ) as v(author_name, author_detail, quote, rating, source, is_verified, is_published, sort_order)
-where not exists (select 1 from public.testimonials t where t.author_name = v.author_name and t.source = 'Google Review');
+where not exists (select 1 from public.testimonials t where lower(t.author_name) = lower(v.author_name) and lower(t.source) = lower(v.source));

@@ -1,7 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { getBookingMode } from "@/lib/booking/config";
+import { notifyNewBooking } from "@/lib/notify";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { createServiceClient } from "@/lib/supabase/admin";
 import { bookingSchema } from "@/lib/validation";
@@ -102,6 +104,13 @@ export async function submitBooking(_prev: ActionState, formData: FormData): Pro
   if (!row?.booking_code || !row?.booking_token) {
     console.error("[create_booking] unexpected response", data);
     return { ok: false, message: "We could not confirm your booking. Please check with us before booking again.", values };
+  }
+
+  // E-mail alerts run after the response is sent; failures are logged and never block the booking.
+  if (row.booking_id) {
+    const id = String(row.booking_id);
+    const token = String(row.booking_token);
+    after(() => notifyNewBooking(id, token));
   }
 
   redirect(`/book/confirmation?code=${encodeURIComponent(row.booking_code)}&token=${encodeURIComponent(row.booking_token)}`);

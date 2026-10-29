@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ChevronDown } from "lucide-react";
 import { AdminForm, Card, Empty, Field, PageTitle } from "@/components/admin/ui";
 import { deleteMedia, replaceMedia, updateMedia, uploadMedia } from "@/app/admin/(panel)/actions";
 import { listMedia } from "@/lib/admin-data";
@@ -39,20 +40,29 @@ export default async function MediaPage() {
               <div className="relative aspect-[16/10] bg-parchment">
                 <Image src={a.url} alt={a.alt_text} fill sizes="(min-width:1280px) 30vw, (min-width:640px) 45vw, 100vw" className="object-cover" unoptimized />
               </div>
-              <div className="space-y-4 p-4">
+              <div className="p-4">
+                <p className="truncate text-sm font-semibold text-charcoal">{a.alt_text}</p>
                 <p className="break-all font-mono text-xs text-ink-soft">{a.storage_path}</p>
-                <AdminForm action={updateMedia} submitLabel="Save details" className="space-y-3">
-                  <input type="hidden" name="id" value={a.id} />
-                  <Field label="Alt text" name={`alt_${a.id}`}><input id={`alt_${a.id}`} name="alt_text" defaultValue={a.alt_text} className="field" maxLength={300} /></Field>
-                  <Field label="Folder" name={`folder_${a.id}`}><input id={`folder_${a.id}`} name="folder" defaultValue={a.folder} className="field" /></Field>
-                </AdminForm>
-                <AdminForm action={replaceMedia} submitLabel="Replace file" className="space-y-3">
-                  <input type="hidden" name="id" value={a.id} />
-                  <Field label="Replace with new file" name={`file_${a.id}`}><input id={`file_${a.id}`} name="file" type="file" accept="image/png,image/jpeg,image/webp,image/avif" className="field !py-2" /></Field>
-                </AdminForm>
-                <AdminForm action={deleteMedia} submitLabel="Delete image" danger confirmMessage="Delete this image? Places using it will show the default ornament.">
-                  <input type="hidden" name="id" value={a.id} />
-                </AdminForm>
+                <details className="group mt-3 rounded-xl border border-sand">
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-sm font-semibold text-maroon [&::-webkit-details-marker]:hidden">
+                    Edit, replace or delete
+                    <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+                  </summary>
+                  <div className="space-y-5 border-t border-sand p-3">
+                    <AdminForm action={updateMedia} submitLabel="Save details" className="space-y-3">
+                      <input type="hidden" name="id" value={a.id} />
+                      <Field label="Alt text" name={`alt_${a.id}`}><input id={`alt_${a.id}`} name="alt_text" defaultValue={a.alt_text} className="field" maxLength={300} /></Field>
+                      <Field label="Folder" name={`folder_${a.id}`}><input id={`folder_${a.id}`} name="folder" defaultValue={a.folder} className="field" /></Field>
+                    </AdminForm>
+                    <AdminForm action={replaceMedia} submitLabel="Replace file" className="space-y-3">
+                      <input type="hidden" name="id" value={a.id} />
+                      <Field label="Replace with new file" name={`file_${a.id}`}><input id={`file_${a.id}`} name="file" type="file" accept="image/png,image/jpeg,image/webp,image/avif" className="field !py-2" /></Field>
+                    </AdminForm>
+                    <AdminForm action={deleteMedia} submitLabel="Delete image" danger confirmMessage="Delete this image? Places using it will show the default ornament.">
+                      <input type="hidden" name="id" value={a.id} />
+                    </AdminForm>
+                  </div>
+                </details>
               </div>
             </li>
           ))}

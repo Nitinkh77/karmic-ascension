@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ChevronDown, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui";
 import { AdminForm, Card, Check, Field, PageTitle } from "@/components/admin/ui";
 import { MediaSelect } from "@/components/admin/MediaSelect";
@@ -87,16 +87,22 @@ export default async function EditPageContent({ params }: { params: Promise<{ sl
       ) : (
         <div className="mt-8 space-y-6">
           <h2 className="text-2xl text-maroon">Sections</h2>
+          <p className="-mt-3 text-sm text-ink-soft">Click a section to open and edit it.</p>
           {sections.map((s) => (
-            <Card key={s.key}>
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-xl text-maroon">{s.label}</h3>
-                <span className="flex gap-2">
-                  {!s.saved && <Badge tone="grey">built-in text</Badge>}
-                  {s.is_draft && <Badge tone="saffron">needs review</Badge>}
-                  {!s.is_visible && <Badge tone="red">hidden</Badge>}
+            <details key={s.key} className="group rounded-2xl border border-sand bg-white-warm shadow-card open:border-gold">
+              <summary className="flex cursor-pointer list-none items-center gap-3 p-4 hover:bg-parchment/50 sm:p-5 [&::-webkit-details-marker]:hidden">
+                <span className="min-w-0 flex-1">
+                  <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <span className="text-xl text-maroon">{s.label}</span>
+                    {!s.saved && <Badge tone="grey">built-in text</Badge>}
+                    {s.is_draft && <Badge tone="saffron">needs review</Badge>}
+                    {!s.is_visible && <Badge tone="red">hidden</Badge>}
+                  </span>
+                  {(s.heading || s.body) && <span className="mt-0.5 block truncate text-sm text-ink-soft">{s.heading || s.body}</span>}
                 </span>
-              </div>
+                <ChevronDown className="h-5 w-5 shrink-0 text-ink-soft transition-transform group-open:rotate-180" aria-hidden="true" />
+              </summary>
+              <div className="border-t border-sand p-5 sm:p-6">
               <AdminForm action={saveSection} submitLabel="Save section">
                 <input type="hidden" name="slug" value={slug} />
                 <input type="hidden" name="section_key" value={s.key} />
@@ -123,7 +129,8 @@ export default async function EditPageContent({ params }: { params: Promise<{ sl
                   </div>
                 </div>
               </AdminForm>
-            </Card>
+              </div>
+            </details>
           ))}
         </div>
       )}

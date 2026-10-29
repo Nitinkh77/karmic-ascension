@@ -6,6 +6,7 @@ import { useState } from "react";
 import {
   CalendarClock,
   CalendarDays,
+  Contact,
   FileText,
   HelpCircle,
   History,
@@ -36,7 +37,8 @@ const GROUPS: Array<{ title: string; items: Item[] }> = [
   {
     title: "Customers & enquiries",
     items: [
-      { href: "/admin/customers", label: "Customers", Icon: UserRound },
+      { href: "/admin/clients", label: "Clients (CRM)", Icon: Contact },
+      { href: "/admin/customers", label: "Sign-ups", Icon: UserRound },
       { href: "/admin/leads", label: "Leads", Icon: Users },
     ],
   },

@@ -19,7 +19,7 @@ import {
 import { Badge, buttonStyles } from "@/components/ui";
 import { Card, Empty } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/auth";
-import { formatDateTimeIst } from "@/lib/booking/slots";
+import { formatDateTimeIst, istDateString } from "@/lib/booking/slots";
 import { getBookingMode } from "@/lib/booking/config";
 import { leadTone, sourceLabel } from "@/lib/leads";
 import { cn, formatPrice } from "@/lib/utils";
@@ -41,6 +41,7 @@ export default async function DashboardPage() {
   const today = istStart().toISOString();
   const weekAgo = new Date(now.getTime() - 7 * DAY).toISOString();
   const weekAhead = new Date(now.getTime() + 7 * DAY).toISOString();
+  const weekAgo30 = new Date(now.getTime() - 30 * DAY).toISOString();
 
   const head = (table: string) => supabase.from(table).select("id", { count: "exact", head: true });
   const count = (q: PromiseLike<{ count: number | null }>) => q.then((r) => r.count ?? 0);
@@ -49,7 +50,7 @@ export default async function DashboardPage() {
   const [
     total, pending, confirmed, completed, cancelled, awaitingPayment, next7,
     paidRows, leadsTotal, leadsNew, leadsToday, sourceRows, customers, customersWeek, services,
-    upcoming, recent, newestLeads,
+    upcoming, recent, newestLeads, followUps, reviewsPending,
   ] = await Promise.all([
     count(head("bookings")),
     bookingsBy("pending"),
@@ -79,7 +80,24 @@ export default async function DashboardPage() {
       .order("created_at", { ascending: false })
       .limit(6),
     supabase.from("leads").select("id, name, status, source, created_at").order("created_at", { ascending: false }).limit(5),
+    // Follow-ups that are due (needs the CRM migration; resolves with an error object, not a throw, if it is missing).
+    supabase
+      .from("bookings")
+      .select("id, customer_name, service_title, follow_up_on")
+      .eq("follow_up_done", false)
+      .not("follow_up_on", "is", null)
+      .lte("follow_up_on", istDateString(new Date()))
+      .order("follow_up_on")
+      .limit(6),
+    supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "completed")
+      .is("review_requested_at", null)
+      .gte("starts_at", weekAgo30),
   ]);
+  const followRows = followUps.error ? [] : (followUps.data ?? []);
+  const reviewsToAsk = reviewsPending.error ? 0 : (reviewsPending.count ?? 0);
 
   const bookable = getBookingMode().enabled;
   const received = (paidRows.data ?? []).reduce((s, r) => s + (Number(r.service_price_paise) || 0), 0);
@@ -96,8 +114,10 @@ export default async function DashboardPage() {
 
   // What needs doing now.
   const todo: Array<{ text: string; href: string }> = [];
+  if (followRows.length > 0) todo.push({ text: `${followRows.length} client follow-up${followRows.length === 1 ? " is" : "s are"} due`, href: "/admin/bookings?followup=due" });
   if (leadsNew > 0) todo.push({ text: `${leadsNew} new ${leadsNew === 1 ? "enquiry needs" : "enquiries need"} a reply`, href: "/admin/leads?status=new" });
   if (pending > 0) todo.push({ text: `${pending} ${pending === 1 ? "booking is" : "bookings are"} waiting for confirmation`, href: "/admin/bookings?status=pending" });
+  if (reviewsToAsk > 0) todo.push({ text: `${reviewsToAsk} completed ${reviewsToAsk === 1 ? "session has" : "sessions have"} not been asked for a Google review`, href: "/admin/bookings?status=completed" });
   if (awaitingPayment > 0) todo.push({ text: `${awaitingPayment} open ${awaitingPayment === 1 ? "booking has" : "bookings have"} no verified payment yet`, href: "/admin/bookings?payment=unpaid" });
 
   const kpis: Array<{ label: string; value: string; note: string; Icon: LucideIcon; href: string }> = [
@@ -112,7 +132,7 @@ export default async function DashboardPage() {
   ];
 
   const modules: Array<{ href: string; label: string; Icon: LucideIcon }> = [
-    { href: "/admin/customers", label: "Customers", Icon: UserRound },
+    { href: "/admin/clients", label: "Clients (CRM)", Icon: UserRound },
     { href: "/admin/bookings", label: "Bookings", Icon: CalendarCheck },
     { href: "/admin/leads", label: "Leads", Icon: Inbox },
     { href: "/admin/services", label: "Services & pricing", Icon: Sparkles },
@@ -132,7 +152,7 @@ export default async function DashboardPage() {
         <div className="flex flex-wrap gap-2">
           <Link href="/admin/bookings" className={buttonStyles("primary", "md")}>Bookings</Link>
           <Link href="/admin/leads" className={buttonStyles("secondary", "md")}>Leads</Link>
-          <Link href="/admin/customers" className={buttonStyles("secondary", "md")}>Customers</Link>
+          <Link href="/admin/clients" className={buttonStyles("secondary", "md")}>Clients</Link>
         </div>
       </div>
 
@@ -223,6 +243,7 @@ export default async function DashboardPage() {
             {([
               ["Database", dbOk ? "Connected" : "Problem", dbOk],
               ["Public booking", bookable && services > 0 ? "Open" : bookable ? "No services published" : "Closed", bookable && services > 0],
+              ["Booking alerts", process.env.RESEND_API_KEY ? "E-mail on" : "E-mail off", Boolean(process.env.RESEND_API_KEY)],
               ["Payments", "Verified by you", true],
             ] as const).map(([k, v, ok]) => (
               <li key={k} className="flex items-center justify-between gap-3 rounded-lg bg-parchment/60 px-3 py-2">
@@ -234,6 +255,25 @@ export default async function DashboardPage() {
           <p className="mt-3 text-xs text-ink-soft">Payments are confirmed by you on each booking. Online payment is not switched on.</p>
         </Card>
       </div>
+
+      {followRows.length > 0 && (
+        <section aria-labelledby="fu-h" className="mt-6">
+          <h2 id="fu-h" className="mb-3 flex items-baseline justify-between gap-2 text-2xl text-maroon">
+            Follow-ups due <Link href="/admin/bookings?followup=due" className="inline-flex items-center gap-1 font-sans text-sm font-semibold text-saffron-deep hover:underline">All <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" /></Link>
+          </h2>
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {followRows.map((f) => (
+              <li key={f.id}>
+                <Link href={`/admin/bookings/${f.id}`} className="block rounded-2xl border border-saffron/40 bg-white-warm p-4 hover:bg-parchment">
+                  <span className="block font-semibold text-charcoal">{f.customer_name}</span>
+                  <span className="block text-sm text-ink-soft">{f.service_title}</span>
+                  <span className="mt-1 block text-xs font-semibold text-saffron-deep">Due {new Date(`${f.follow_up_on}T00:00:00+05:30`).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <Card className="mt-6 min-w-0">
         <h2 className="font-sans text-sm font-semibold uppercase tracking-wide text-charcoal">Quick access</h2>

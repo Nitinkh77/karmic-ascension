@@ -81,6 +81,8 @@ export const settingsSchema = z.object({
   instagram_url: url,
   youtube_url: url,
   astrosage_url: url,
+  google_review_url: url,
+  notify_email: z.preprocess(emptyToNull, z.string().trim().email("Enter a valid email.").max(200).nullable()),
   paytm_phonepe_number: optText(30),
   gpay_upi_id: optText(100),
   payment_instructions: optText(1000),
@@ -245,6 +247,30 @@ export const bookingPaymentSchema = z.object({
 export const bookingNotesSchema = z.object({
   id: uuid,
   admin_notes: optText(4000),
+});
+
+export const caseRecordSchema = z.object({
+  id: uuid,
+  case_lagna: optText(120),
+  case_rashi: optText(120),
+  case_dasha: optText(160),
+  case_observations: optText(4000),
+  case_pending_karma: optText(4000),
+  remedy_gemstones: optText(1500),
+  remedy_mantras: optText(1500),
+  remedy_fasts: optText(1500),
+  remedy_donations: optText(1500),
+});
+
+export const followUpSchema = z.object({
+  id: uuid,
+  follow_up_on: z.preprocess(emptyToNull, isoDate.nullable()),
+  follow_up_done: z.boolean(),
+});
+
+export const testimonialPublishSchema = z.object({
+  id: uuid,
+  publish: z.enum(["publish", "hide"]),
 });
 
 export const bookingRescheduleSchema = z.object({

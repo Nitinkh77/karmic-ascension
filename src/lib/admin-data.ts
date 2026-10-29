@@ -13,6 +13,11 @@ export async function listMedia(sb: SupabaseClient): Promise<MediaAsset[]> {
 export const BOOKING_COLUMNS =
   "id, public_code, service_id, service_title, service_price_paise, currency, duration_minutes, customer_name, customer_email, customer_phone, birth_date, birth_time, birth_place, customer_notes, starts_at, ends_at, status, payment_status, payment_method, admin_notes, created_at";
 
+/** Everything on the booking detail page, including the private case record. */
+export const BOOKING_DETAIL_COLUMNS =
+  BOOKING_COLUMNS +
+  ", case_lagna, case_rashi, case_dasha, case_observations, case_pending_karma, remedy_gemstones, remedy_mantras, remedy_fasts, remedy_donations, follow_up_on, follow_up_done, review_requested_at";
+
 export type { Booking };
 
 export function parseBookingFilters(sp: Record<string, string | string[] | undefined>) {
@@ -29,5 +34,6 @@ export function parseBookingFilters(sp: Record<string, string | string[] | undef
     service: /^[0-9a-f-]{36}$/i.test(one("service")) ? one("service") : "",
     from: isDate(one("from")) ? one("from") : "",
     to: isDate(one("to")) ? one("to") : "",
+    followup: one("followup") === "due" ? "due" : "",
   };
 }
