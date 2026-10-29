@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Clock, Mail, MapPin, MessageCircle, Phone, type LucideIcon } from "lucide-react";
+import { Clock, Mail, MapPin, MessageCircle, Phone, Star, type LucideIcon } from "lucide-react";
 import { Container, RichText, SectionHeading } from "@/components/ui";
 import { LeadForm } from "@/components/site/LeadForm";
 import { getPageContent, getSettings, sectionByKey } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
-import { whatsappLink } from "@/lib/utils";
+import { safeHref, whatsappLink } from "@/lib/utils";
 
 // Re-read the database at most once a minute so admin edits show up without a redeploy.
 export const revalidate = 60;
@@ -42,10 +42,43 @@ export default async function ContactPage() {
       node: <a className="break-all hover:underline" href={`mailto:${s.contact_email}`}>{s.contact_email}</a>,
     });
   if (s.address) rows.push({ Icon: MapPin, label: "Location", node: s.address });
+  if (s.google_business_url)
+    rows.push({
+      Icon: Star,
+      label: "Google",
+      node: (
+        <span>
+          <a className="hover:underline" href={safeHref(s.google_business_url)} target="_blank" rel="noopener noreferrer">
+            Find us on Google<span className="sr-only"> (opens in a new tab)</span>
+          </a>
+          {s.google_review_url && (
+            <>
+              {" · "}
+              <a className="hover:underline" href={safeHref(s.google_review_url)} target="_blank" rel="noopener noreferrer">
+                Leave a review<span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            </>
+          )}
+        </span>
+      ),
+    });
   if (s.hours_text) rows.push({ Icon: Clock, label: "Consultation hours (IST)", node: s.hours_text });
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    name: s.brand_name,
+    description: s.description,
+    ...(s.contact_phone ? { telephone: s.contact_phone } : {}),
+    ...(s.contact_email ? { email: s.contact_email } : {}),
+    ...(s.address ? { address: s.address } : {}),
+    ...(s.google_business_url ? { hasMap: s.google_business_url } : {}),
+    sameAs: [s.google_business_url, s.instagram_url, s.facebook_url, s.youtube_url].filter(Boolean),
+  };
 
   return (
     <section className="py-14 sm:py-20">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <Container narrow>
         <SectionHeading as="h1" eyebrow={intro?.eyebrow} title={intro?.heading ?? "Contact"} description={intro?.body} />
         <dl className="ornate-frame mt-12 divide-y divide-sand rounded-2xl">

@@ -30,6 +30,7 @@ export interface SiteSettings {
   og_image_asset_id: string | null;
   google_review_url?: string | null;
   notify_email?: string | null;
+  google_business_url?: string | null;
 }
 
 export interface SectionItem {

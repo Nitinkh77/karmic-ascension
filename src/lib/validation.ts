@@ -82,6 +82,7 @@ export const settingsSchema = z.object({
   youtube_url: url,
   astrosage_url: url,
   google_review_url: url,
+  google_business_url: url,
   notify_email: z.preprocess(emptyToNull, z.string().trim().email("Enter a valid email.").max(200).nullable()),
   paytm_phonepe_number: optText(30),
   gpay_upi_id: optText(100),

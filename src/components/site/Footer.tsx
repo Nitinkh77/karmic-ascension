@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, MapPin, MessageCircle, Phone, Clock } from "lucide-react";
+import { Mail, MapPin, MessageCircle, Phone, Clock, Star } from "lucide-react";
 import { Emblem, ScallopBand } from "@/components/art/Ornaments";
 import { splitBrand } from "@/components/site/Header";
 import { Facebook, Instagram, Youtube } from "@/components/site/SocialIcons";
@@ -133,6 +133,24 @@ export function Footer({ settings }: { settings: SiteSettings }) {
               <li className="flex items-start gap-3">
                 <MapPin className="mt-1 h-4 w-4 shrink-0 text-gold-deep" aria-hidden="true" />
                 <span>{settings.address}</span>
+              </li>
+            )}
+            {settings.google_business_url && (
+              <li className="flex items-start gap-3">
+                <Star className="mt-1 h-4 w-4 shrink-0 text-gold-deep" aria-hidden="true" />
+                <span>
+                  <a href={safeHref(settings.google_business_url)} target="_blank" rel="noopener noreferrer" className="hover:text-maroon hover:underline">
+                    Find us on Google<span className="sr-only"> (opens in a new tab)</span>
+                  </a>
+                  {settings.google_review_url && (
+                    <>
+                      {" · "}
+                      <a href={safeHref(settings.google_review_url)} target="_blank" rel="noopener noreferrer" className="hover:text-maroon hover:underline">
+                        Review us<span className="sr-only"> (opens in a new tab)</span>
+                      </a>
+                    </>
+                  )}
+                </span>
               </li>
             )}
             {settings.hours_text && (

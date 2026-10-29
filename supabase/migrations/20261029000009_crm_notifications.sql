@@ -34,4 +34,5 @@ create index if not exists bookings_phone_idx on public.bookings (customer_phone
 
 alter table public.site_settings
   add column if not exists google_review_url text check (google_review_url is null or char_length(google_review_url) <= 400),
-  add column if not exists notify_email      text check (notify_email is null or char_length(notify_email) <= 200);
+  add column if not exists notify_email      text check (notify_email is null or char_length(notify_email) <= 200),
+  add column if not exists google_business_url text check (google_business_url is null or char_length(google_business_url) <= 400);

@@ -73,6 +73,9 @@ export default async function SettingsPage() {
             <Field label="Alert e-mail (new bookings are sent here)" name="notify_email" hint="Leave empty to use the contact e-mail above.">
               <input id="notify_email" name="notify_email" type="email" defaultValue={v(s.notify_email)} className="field" />
             </Field>
+            <Field label="Google Business Profile link" name="google_business_url" hint="Open the business on Google Maps → Share → copy the link. Shown on the Contact page and footer as “Find us on Google”.">
+              <input id="google_business_url" name="google_business_url" type="url" defaultValue={v(s.google_business_url)} className="field" placeholder="https://maps.app.goo.gl/…" />
+            </Field>
             <Field label="Google review link" name="google_review_url" hint="Google Business Profile → “Ask for reviews” → copy the link. Used by the review-request button on completed bookings.">
               <input id="google_review_url" name="google_review_url" type="url" defaultValue={v(s.google_review_url)} className="field" placeholder="https://g.page/r/…/review" />
             </Field>
