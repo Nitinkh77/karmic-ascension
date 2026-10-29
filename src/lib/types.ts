@@ -31,6 +31,8 @@ export interface SiteSettings {
   google_review_url?: string | null;
   notify_email?: string | null;
   google_business_url?: string | null;
+  google_rating?: number | string | null;
+  google_review_count?: number | null;
 }
 
 export interface SectionItem {

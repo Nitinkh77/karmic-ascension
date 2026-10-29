@@ -76,6 +76,12 @@ export default async function SettingsPage() {
             <Field label="Google Business Profile link" name="google_business_url" hint="Open the business on Google Maps → Share → copy the link. Shown on the Contact page and footer as “Find us on Google”.">
               <input id="google_business_url" name="google_business_url" type="url" defaultValue={v(s.google_business_url)} className="field" placeholder="https://maps.app.goo.gl/…" />
             </Field>
+            <Field label="Google rating (optional)" name="google_rating" hint="e.g. 5.0. Shown in the “Google reviews” badge. Update it now and then.">
+              <input id="google_rating" name="google_rating" type="number" step="0.1" min="1" max="5" defaultValue={v(s.google_rating)} className="field" placeholder="5.0" />
+            </Field>
+            <Field label="Number of Google reviews (optional)" name="google_review_count" hint="e.g. 98.">
+              <input id="google_review_count" name="google_review_count" type="number" min="0" defaultValue={v(s.google_review_count)} className="field" placeholder="98" />
+            </Field>
             <Field label="Google review link" name="google_review_url" hint="Google Business Profile → “Ask for reviews” → copy the link. Used by the review-request button on completed bookings.">
               <input id="google_review_url" name="google_review_url" type="url" defaultValue={v(s.google_review_url)} className="field" placeholder="https://g.page/r/…/review" />
             </Field>

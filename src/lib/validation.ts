@@ -83,6 +83,8 @@ export const settingsSchema = z.object({
   astrosage_url: url,
   google_review_url: url,
   google_business_url: url,
+  google_rating: z.preprocess(emptyToNull, z.coerce.number().min(1, "Rating is between 1 and 5.").max(5, "Rating is between 1 and 5.").nullable()),
+  google_review_count: z.preprocess(emptyToNull, z.coerce.number().int().min(0).max(1000000).nullable()),
   notify_email: z.preprocess(emptyToNull, z.string().trim().email("Enter a valid email.").max(200).nullable()),
   paytm_phonepe_number: optText(30),
   gpay_upi_id: optText(100),

@@ -7,7 +7,7 @@ import { ButtonLink, Container, SectionHeading } from "@/components/ui";
 import { getBookingMode } from "@/lib/booking/config";
 import { getPageContent, getSettings, getTestimonials, sectionByKey } from "@/lib/data";
 import { safeHref } from "@/lib/utils";
-import type { Testimonial } from "@/lib/types";
+import type { SiteSettings, Testimonial } from "@/lib/types";
 
 // Re-read the database at most once a minute so admin edits show up without a redeploy.
 export const revalidate = 60;
@@ -147,7 +147,9 @@ function GoogleIcon({ className }: { className?: string }) {
 
 /* ── Summary banner ──────────────────────────────────────────────────── */
 
-function ReviewSummary({ count }: { count: number }) {
+function ReviewSummary({ count, settings }: { count: number; settings: SiteSettings }) {
+  const rating = settings.google_rating ? Number(settings.google_rating).toFixed(1) : "5.0";
+  const total = settings.google_review_count ?? count;
   return (
     <Reveal>
       <div className="mx-auto mt-10 flex max-w-xl flex-col items-center gap-4 rounded-2xl border border-gold-soft bg-parchment/60 px-6 py-5 text-center sm:flex-row sm:text-left">
@@ -155,7 +157,7 @@ function ReviewSummary({ count }: { count: number }) {
           <GoogleIcon className="h-7 w-7" />
           <div>
             <p className="flex items-center gap-1.5">
-              <span className="text-2xl font-bold text-charcoal">5.0</span>
+              <span className="text-2xl font-bold text-charcoal">{rating}</span>
               <span className="flex gap-0.5 text-saffron">
                 {Array.from({ length: 5 }, (_, i) => (
                   <Star key={i} className="h-4 w-4 fill-current" aria-hidden="true" />
@@ -163,10 +165,24 @@ function ReviewSummary({ count }: { count: number }) {
               </span>
             </p>
             <p className="text-sm text-ink-soft">
-              Based on {count} Google {count === 1 ? "review" : "reviews"}
+              Based on {total} Google {total === 1 ? "review" : "reviews"}
             </p>
           </div>
         </div>
+        {(settings.google_business_url || settings.google_review_url) && (
+          <div className="flex flex-wrap justify-center gap-2 sm:ml-auto">
+            {settings.google_business_url && (
+              <a href={safeHref(settings.google_business_url)} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-gold bg-white-warm px-4 text-sm font-semibold text-maroon hover:bg-parchment">
+                See all on Google<span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            )}
+            {settings.google_review_url && (
+              <a href={safeHref(settings.google_review_url)} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-maroon px-4 text-sm font-semibold text-ivory hover:bg-maroon-deep">
+                Write a review<span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            )}
+          </div>
+        )}
       </div>
     </Reveal>
   );
@@ -202,7 +218,7 @@ export default async function ReviewsPage() {
           </Reveal>
 
           {/* Star summary */}
-          {googleReviews.length > 0 && <ReviewSummary count={googleReviews.length} />}
+          {(googleReviews.length > 0 || settings.google_business_url) && <ReviewSummary count={googleReviews.length} settings={settings} />}
         </Container>
       </section>
 

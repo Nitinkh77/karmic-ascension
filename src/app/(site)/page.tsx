@@ -39,7 +39,7 @@ export default async function HomePage() {
       {intro && <Intro s={intro} />}
       <HomeGallery services={allServices} />
       <ExploreTiles />
-      <HomeReviews items={reviews} />
+      <HomeReviews items={reviews} settings={settings} />
     </>
   );
 }

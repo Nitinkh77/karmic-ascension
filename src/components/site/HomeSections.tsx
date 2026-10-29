@@ -1,3 +1,4 @@
+import { GoogleBadge } from "@/components/site/GoogleBadge";
 import Link from "next/link";
 import { BadgeCheck, CalendarCheck, Compass, MessageCircle, Quote, Sparkles, Star, type LucideIcon } from "lucide-react";
 import { ArrowRight, Orbit, Sun, HelpCircle, MessageSquareQuote, Route as RouteIcon, UserRound, Phone as PhoneIcon } from "lucide-react";
@@ -48,8 +49,9 @@ export function Hero({ s, settings, bookable }: { s: Section; settings: SiteSett
               Explore consultations
             </ButtonLink>
           </div>
+          <GoogleBadge settings={settings} className="mt-6" />
           {settings.hours_text && (
-            <p className="mt-6 text-sm text-ink-soft">
+            <p className="mt-4 text-sm text-ink-soft">
               Consultations: <span className="font-semibold text-charcoal">{settings.hours_text}</span>
             </p>
           )}
@@ -423,7 +425,7 @@ export function HomeGallery({ services }: { services: Service[] }) {
 }
 
 /** Up to six verified reviews with a link to all of them. Renders nothing when there are none. */
-export function HomeReviews({ items }: { items: Testimonial[] }) {
+export function HomeReviews({ items, settings }: { items: Testimonial[]; settings: SiteSettings }) {
   const top = items.slice(0, 6);
   if (top.length === 0) return null;
   return (
@@ -439,8 +441,9 @@ export function HomeReviews({ items }: { items: Testimonial[] }) {
             </li>
           ))}
         </ul>
-        <div className="mt-6 text-center">
+        <div className="mt-6 flex flex-col items-center justify-center gap-3 text-center sm:flex-row">
           <ButtonLink href="/reviews" variant="secondary">Read all reviews</ButtonLink>
+          <GoogleBadge settings={settings} />
         </div>
       </Container>
     </section>

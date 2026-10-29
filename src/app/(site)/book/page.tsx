@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GoogleBadge } from "@/components/site/GoogleBadge";
 import { OrnamentDivider } from "@/components/art/Ornaments";
 import { ButtonLink, Container, SectionHeading } from "@/components/ui";
 import { BookingForm } from "@/app/(site)/book/BookingForm";
@@ -57,6 +58,9 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
           title="Book a consultation"
           description="Choose your consultation, pick a time and share your details. It takes about two minutes."
         />
+        <div className="mt-6 flex justify-center">
+          <GoogleBadge settings={settings} />
+        </div>
         <OrnamentDivider className="my-8" />
         {services.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-gold bg-white-warm p-8 text-center text-ink-soft">

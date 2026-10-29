@@ -42,7 +42,7 @@ export async function saveSettings(_p: ActionState, fd: FormData): Promise<Actio
     if (error) {
       // The two newest settings need the latest migration. Until it is run, still save everything else.
       if (error.code === "PGRST204" || error.code === "42703") {
-        const { notify_email: _n, google_review_url: _g, google_business_url: _b, ...rest } = r.data;
+        const { notify_email: _n, google_review_url: _g, google_business_url: _b, google_rating: _r, google_review_count: _c, ...rest } = r.data;
         const retry = await supabase.from("site_settings").update(rest).eq("id", 1);
         if (retry.error) return fail(dbErrorMessage(retry.error));
         refreshSite();
